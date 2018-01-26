@@ -1,7 +1,7 @@
 # OpenRISC 1000 Multicore Virtual Platform (or1kmvp)
 
 This repository contains the source code of `or1kmvp`, an OpenRISC 1000
-Multicore Virtual Platform based on SystemC and TLM. It models a regular
+Multicore Virtual Platform based on SystemC/TLM. It models a regular
 symmetric multiprocessor design with a configurable number of processors and
 a set of I/O peripherals. `or1kmvp` is detailed enough to run the Linux
 kernel and fast enough to allow interactive command-line use.
@@ -10,8 +10,8 @@ performance of around 35 MIPS (which are split among all instruction set
 simulators present in the system).
 It is intended to be used by software developers to test and run parallel
 OpenRISC applications without the need for physical OpenRISC hardware.
-Furthermore, it can also be used as a starting point for custom SystemC-based
-Virtual Platforms.
+Furthermore, it can also be used as a starting point for custom SystemC
+and OpenRISC based Virtual Platforms.
 
 ----
 ## Build & Installation
