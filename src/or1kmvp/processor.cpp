@@ -198,14 +198,14 @@ namespace or1kmvp {
     }
 
     static const char* g_buserror =
-        "[E %.9fs] detected bus error during operation\n"
-        "  addr: 0x%08" PRIx32 " (%s)\n"
-        "  pc  : 0x%08" PRIx32 "\n"
-        "  sp  : 0x%08" PRIx32 "\n"
-        "  size: %d bytes\n"
-        "  core: %d\n"
-        "  port: %s\n"
-        "  code: %s\n";
+        "bus error\n"
+        "  addr : 0x%08" PRIx32 " (%s)\n"
+        "  pc   : 0x%08" PRIx32 "\n"
+        "  sp   : 0x%08" PRIx32 "\n"
+        "  size : %d bytes\n"
+        "  core : %d\n"
+        "  port : %s\n"
+        "  code : %s";
 
     or1kiss::response processor::transact(const or1kiss::request& req) {
         int flags = vcml::VCML_FLAG_NONE;
@@ -233,15 +233,14 @@ namespace or1kmvp {
         // Check bus error
         if (rs != tlm::TLM_OK_RESPONSE) {
             if (!req.is_debug()) {
-                double timestamp = sc_core::sc_time_stamp().to_seconds();
                 char str[256];
-                snprintf(str, sizeof(str), g_buserror, timestamp, req.addr,
+                snprintf(str, sizeof(str), g_buserror, req.addr,
                          req.is_write() ? "write" : "read",
                          m_iss->get_spr(or1kiss::SPR_NPC, true), m_iss->GPR[1],
                          req.size, m_iss->get_core_id(),
                          req.is_imem() ? "INSN" : "DATA",
                          vcml::tlm_response_to_str(rs).c_str());
-                vcml::log_warning(str);
+                vcml::log_debug(str);
             }
 
             return or1kiss::RESP_ERROR;
