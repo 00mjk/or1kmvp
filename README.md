@@ -13,6 +13,8 @@ OpenRISC applications without the need for physical OpenRISC hardware.
 Furthermore, it can also be used as a starting point for custom SystemC
 and OpenRISC based Virtual Platforms.
 
+[![Build Status](https://travis-ci.org/janweinstock/or1kmvp.svg?branch=master)](https://travis-ci.org/janweinstock/or1kmvp)
+
 ----
 ## Build & Installation
 
