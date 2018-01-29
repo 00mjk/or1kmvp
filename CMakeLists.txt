@@ -53,4 +53,7 @@ target_link_libraries(or1kmvp -pthread)
 
 install(TARGETS or1kmvp DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
-install(DIRECTORY sw/ DESTINATION sw)
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sw/)
+   install(DIRECTORY sw/ DESTINATION sw)
+endif()
