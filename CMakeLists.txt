@@ -45,10 +45,10 @@ target_include_directories(or1kmvp PRIVATE ${OR1KISS_INCLUDE_DIRS})
 target_include_directories(or1kmvp PRIVATE ${VCML_INCLUDE_DIRS})
 target_include_directories(or1kmvp SYSTEM PRIVATE ${SYSTEMC_INCLUDE_DIRS})
 
-target_link_libraries(or1kmvp ${LIBELF_LIBRARIES})
 target_link_libraries(or1kmvp ${OR1KISS_LIBRARIES})
 target_link_libraries(or1kmvp ${VCML_LIBRARIES})
 target_link_libraries(or1kmvp ${SYSTEMC_LIBRARIES})
+target_link_libraries(or1kmvp ${LIBELF_LIBRARIES})
 target_link_libraries(or1kmvp -pthread)
 
 install(TARGETS or1kmvp DESTINATION bin)
