@@ -21,7 +21,7 @@
 
 #include "or1kmvp/common.h"
 #include "or1kmvp/config.h"
-#include "or1kmvp/processor.h"
+#include "or1kmvp/openrisc.h"
 
 namespace or1kmvp {
 
@@ -31,7 +31,7 @@ namespace or1kmvp {
         struct timeval m_sim_start;
         struct timeval m_sim_end;
 
-        std::vector<processor*>  m_cpus;
+        std::vector<openrisc*>  m_cpus;
 
         void build_processors();
         void clean_processors();

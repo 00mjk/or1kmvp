@@ -33,7 +33,7 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(inc "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(sources
-    ${src}/or1kmvp/processor.cpp
+    ${src}/or1kmvp/openrisc.cpp
     ${src}/or1kmvp/system.cpp
     ${src}/main.cpp)
 

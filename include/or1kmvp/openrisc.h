@@ -16,16 +16,16 @@
  *                                                                            *
  ******************************************************************************/
 
-#ifndef OR1KMVP_PROCESSOR_H
-#define OR1KMVP_PROCESSOR_H
+#ifndef OR1KMVP_OPENRISC_H
+#define OR1KMVP_OPENRISC_H
 
 #include "or1kmvp/common.h"
 #include "or1kmvp/config.h"
 
 namespace or1kmvp {
 
-    class processor: public vcml::processor,
-                     public or1kiss::env {
+    class openrisc: public vcml::processor,
+                    public or1kiss::env {
     private:
         or1kiss::or1k* m_iss;
         or1kiss::gdb*  m_gdb;
@@ -52,8 +52,8 @@ namespace or1kmvp {
 
         void log_timing_info() const;
 
-        processor(const sc_core::sc_module_name& nm, unsigned int coreid);
-        virtual ~processor();
+        openrisc(const sc_core::sc_module_name& nm, unsigned int coreid);
+        virtual ~openrisc();
 
         virtual bool insert_breakpoint(vcml::u64 address) override;
         virtual bool remove_breakpoint(vcml::u64 address) override;
@@ -69,6 +69,8 @@ namespace or1kmvp {
         virtual void simulate(unsigned int&) override;
 
         virtual or1kiss::response transact(const or1kiss::request& r) override;
+
+        virtual void end_of_elaboration() override;
     };
 
 }

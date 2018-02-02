@@ -16,11 +16,11 @@
  *                                                                            *
  ******************************************************************************/
 
-#include "or1kmvp/processor.h"
+#include <or1kmvp/openrisc.h>
 
 namespace or1kmvp {
 
-    void processor::start_gdb() {
+    void openrisc::start_gdb() {
         if (m_gdb != NULL) {
             vcml::log_warning("closing previous gdb session");
             stop_gdb();
@@ -35,7 +35,7 @@ namespace or1kmvp {
         }
     }
 
-    void processor::stop_gdb() {
+    void openrisc::stop_gdb() {
         if (m_gdb != NULL) {
             delete m_gdb;
             m_gdb = NULL;
@@ -47,7 +47,7 @@ namespace or1kmvp {
         }
     }
 
-    void processor::log_timing_info() const {
+    void openrisc::log_timing_info() const {
         vcml::log_info("processor '%s'", name());
         vcml::log_info("  clock speed  : %.1f MHz", clock / 1e6);
         vcml::log_info("  sim speed    : %.1f MIPS",
@@ -81,7 +81,7 @@ namespace or1kmvp {
         }
     }
 
-    processor::processor(const sc_core::sc_module_name& nm, unsigned int id):
+    openrisc::openrisc(const sc_core::sc_module_name& nm, unsigned int id):
         vcml::processor(nm, OR1KMVP_CPU_DEFCLK),
         or1kiss::env(or1kiss::ENDIAN_BIG),
         m_iss(NULL),
@@ -106,29 +106,27 @@ namespace or1kmvp {
         m_iss->set_clock(clock);
         m_iss->set_core_id(id);
         m_iss->allow_sleep(enable_sleep_mode);
+        m_iss->GPR[3] = OR1KMVP_DTB_ADDR;
 
         if (!insn_trace_file.get().empty())
             m_iss->trace(insn_trace_file);
-
-        if (gdb_wait)
-            start_gdb();
     }
 
-    processor::~processor() {
+    openrisc::~openrisc() {
         if (m_iss) delete m_iss;
         if (m_gdb) delete m_gdb;
     }
 
-    bool processor::insert_breakpoint(vcml::u64 address) {
+    bool openrisc::insert_breakpoint(vcml::u64 address) {
         m_iss->insert_breakpoint(address);
         return true;
     }
-    bool processor::remove_breakpoint(vcml::u64 address) {
+    bool openrisc::remove_breakpoint(vcml::u64 address) {
         m_iss->remove_breakpoint(address);
         return true;
     }
 
-    bool processor::virt_to_phys(vcml::u64 vaddr, vcml::u64& paddr) {
+    bool openrisc::virt_to_phys(vcml::u64 vaddr, vcml::u64& paddr) {
         if (!m_iss->is_immu_active()) {
             paddr = vaddr;
             return true;
@@ -147,29 +145,29 @@ namespace or1kmvp {
         return true;
     }
 
-    std::string processor::disassemble(vcml::u64& addr, unsigned char* insn) {
+    std::string openrisc::disassemble(vcml::u64& addr, unsigned char* insn) {
         or1kiss::u32* pinsn = (or1kiss::u32*)insn;
         addr += 4;
         return or1kiss::disassemble(or1kiss::byte_swap(*pinsn));
     }
 
-    vcml::u64 processor::get_program_counter() {
+    vcml::u64 openrisc::get_program_counter() {
         return m_iss->get_spr(or1kiss::SPR_NPC, true);
     }
 
-    vcml::u64 processor::get_stack_pointer() {
+    vcml::u64 openrisc::get_stack_pointer() {
         return m_iss->GPR[1];
     }
 
-    vcml::u64 processor::get_core_id() {
+    vcml::u64 openrisc::get_core_id() {
         return m_iss->get_core_id();
     }
 
-    void processor::interrupt(unsigned int irq, bool set) {
+    void openrisc::interrupt(unsigned int irq, bool set) {
         m_iss->interrupt(irq, set);
     }
 
-    void processor::simulate(unsigned int& n) {
+    void openrisc::simulate(unsigned int& n) {
         if ((m_gdb != NULL) && (!m_gdb->is_connected()))
             stop_gdb();
 
@@ -207,7 +205,7 @@ namespace or1kmvp {
         "  port : %s\n"
         "  code : %s";
 
-    or1kiss::response processor::transact(const or1kiss::request& req) {
+    or1kiss::response openrisc::transact(const or1kiss::request& req) {
         int flags = vcml::VCML_FLAG_NONE;
         if (req.is_debug())
             flags |= vcml::VCML_FLAG_DEBUG;
@@ -265,6 +263,13 @@ namespace or1kmvp {
         if (req.is_exclusive() && (nbytes != req.size))
             return or1kiss::RESP_FAILED;
         return or1kiss::RESP_SUCCESS;
+    }
+
+    void openrisc::end_of_elaboration() {
+        vcml::processor::end_of_elaboration();
+
+        if (gdb_wait)
+            start_gdb();
     }
 
 }

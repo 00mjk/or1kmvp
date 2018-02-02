@@ -24,7 +24,7 @@ namespace or1kmvp {
         m_cpus.resize(nrcpu);
         for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
             std::stringstream ss; ss << "cpu" << cpu;
-            m_cpus[cpu] = new processor(ss.str().c_str(), cpu);
+            m_cpus[cpu] = new openrisc(ss.str().c_str(), cpu);
         }
     }
 
@@ -79,7 +79,7 @@ namespace or1kmvp {
     }
 
     void system::connect_bus() {
-        for (processor* cpu : m_cpus) {
+        for (openrisc* cpu : m_cpus) {
            m_bus->bind(cpu->INSN);
            m_bus->bind(cpu->DATA);
         }

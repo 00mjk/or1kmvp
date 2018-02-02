@@ -29,10 +29,6 @@
 #define OR1KMVP_MEM_SIZE        (0x08000000) // 128 MB
 #define OR1KMVP_MEM_END         (OR1KMVP_MEM_ADDR + OR1KMVP_MEM_SIZE - 1)
 
-#define OR1KMVP_DTM_ADDR        (0xa0000000)
-#define OR1KMVP_DTM_SIZE        (OR1KISS_PAGE_SIZE)
-#define OR1KMVP_DTM_END         (OR1KMVP_DTM_ADDR + OR1KMVP_DTM_SIZE - 1)
-
 #define OR1KMVP_OMPIC_ADDR      (0x98000000)
 #define OR1KMVP_OMPIC_SIZE      (OR1KISS_PAGE_SIZE)
 #define OR1KMVP_OMPIC_END       (OR1KMVP_OMPIC_ADDR + OR1KMVP_OMPIC_SIZE - 1)
@@ -62,5 +58,9 @@
 #define OR1KMVP_IRQ_UART        (2)
 #define OR1KMVP_IRQ_ETH         (4)
 #define OR1KMVP_IRQ_KB          (5)
+
+/* Important memory locations */
+#define OR1KMVP_KERNEL_ADDR     (0x00000000)
+#define OR1KMVP_DTB_ADDR        (0x04000000)
 
 #endif
