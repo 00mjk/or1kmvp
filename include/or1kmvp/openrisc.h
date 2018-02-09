@@ -28,8 +28,6 @@ namespace or1kmvp {
                     public or1kiss::env {
     private:
         or1kiss::or1k* m_iss;
-        or1kiss::gdb*  m_gdb;
-        or1kiss::elf*  m_elf;
 
     public:
         vcml::property<bool> enable_decode_cache;
@@ -44,21 +42,11 @@ namespace or1kmvp {
 
         vcml::property<std::string> insn_trace_file;
 
-        vcml::property<unsigned short> gdb_port;
-        vcml::property<bool>           gdb_wait;
-
-        void start_gdb();
-        void stop_gdb();
-
         void log_timing_info() const;
 
         openrisc(const sc_core::sc_module_name& nm, unsigned int coreid);
         virtual ~openrisc();
 
-        virtual bool insert_breakpoint(vcml::u64 address) override;
-        virtual bool remove_breakpoint(vcml::u64 address) override;
-
-        virtual bool virt_to_phys(vcml::u64 vaddr, vcml::u64& paddr) override;
         virtual std::string disassemble(vcml::u64&, unsigned char*) override;
 
         virtual vcml::u64 get_program_counter() override;
@@ -71,6 +59,20 @@ namespace or1kmvp {
         virtual or1kiss::response transact(const or1kiss::request& r) override;
 
         virtual void end_of_elaboration() override;
+
+        virtual vcml::u64 gdb_num_registers() override;
+        virtual vcml::u64 gdb_register_width() override;
+
+        virtual bool gdb_read_reg  (vcml::u64 reg, void* buffer,
+                                    vcml::u64 size) override;
+        virtual bool gdb_write_reg (vcml::u64 reg, const void* buffer,
+                                    vcml::u64 size) override;
+
+        virtual bool gdb_page_size(vcml::u64& size) override;
+        virtual bool gdb_virt_to_phys(vcml::u64 va, vcml::u64& pa) override;
+
+        virtual bool gdb_insert_breakpoint(vcml::u64 addr) override;
+        virtual bool gdb_remove_breakpoint(vcml::u64 addr) override;
     };
 
 }

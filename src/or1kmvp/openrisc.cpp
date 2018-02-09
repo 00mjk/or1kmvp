@@ -20,33 +20,6 @@
 
 namespace or1kmvp {
 
-    void openrisc::start_gdb() {
-        if (m_gdb != NULL) {
-            vcml::log_warning("closing previous gdb session");
-            stop_gdb();
-        }
-
-        m_gdb = new or1kiss::gdb(*m_iss, gdb_port);
-        m_gdb->show_warnings();
-
-        if (!symbols.get().empty()) {
-            m_elf = new or1kiss::elf(symbols);
-            m_gdb->set_elf(m_elf);
-        }
-    }
-
-    void openrisc::stop_gdb() {
-        if (m_gdb != NULL) {
-            delete m_gdb;
-            m_gdb = NULL;
-        }
-
-        if (m_elf != NULL) {
-            delete m_elf;
-            m_elf = NULL;
-        }
-    }
-
     void openrisc::log_timing_info() const {
         vcml::log_info("processor '%s'", name());
         vcml::log_info("  clock speed  : %.1f MHz", clock / 1e6);
@@ -85,8 +58,6 @@ namespace or1kmvp {
         vcml::processor(nm, OR1KMVP_CPU_DEFCLK),
         or1kiss::env(or1kiss::ENDIAN_BIG),
         m_iss(NULL),
-        m_gdb(NULL),
-        m_elf(NULL),
         enable_decode_cache("enable_decode_cache", true),
         enable_sleep_mode("enable_sleep_mode", true),
         enable_insn_dmi("enable_insn_dmi", true),
@@ -95,9 +66,7 @@ namespace or1kmvp {
         irq_uart("irq_uart", OR1KMVP_IRQ_UART),
         irq_eth("irq_eth", OR1KMVP_IRQ_ETH),
         irq_kb("irq_kb", OR1KMVP_IRQ_KB),
-        insn_trace_file("insn_trace_file", ""),
-        gdb_port("gdb_port", 0),
-        gdb_wait("gdb_wait", false) {
+        insn_trace_file("insn_trace_file", "") {
         or1kiss::decode_cache_size sz;
         sz = enable_decode_cache ? or1kiss::DECODE_CACHE_SIZE_8M
                                  : or1kiss::DECODE_CACHE_OFF;
@@ -114,35 +83,6 @@ namespace or1kmvp {
 
     openrisc::~openrisc() {
         if (m_iss) delete m_iss;
-        if (m_gdb) delete m_gdb;
-    }
-
-    bool openrisc::insert_breakpoint(vcml::u64 address) {
-        m_iss->insert_breakpoint(address);
-        return true;
-    }
-    bool openrisc::remove_breakpoint(vcml::u64 address) {
-        m_iss->remove_breakpoint(address);
-        return true;
-    }
-
-    bool openrisc::virt_to_phys(vcml::u64 vaddr, vcml::u64& paddr) {
-        if (!m_iss->is_immu_active()) {
-            paddr = vaddr;
-            return true;
-        }
-
-        or1kiss::request req;
-        req.set_imem();
-        req.set_read();
-        req.set_debug();
-        req.addr = vaddr;
-
-        if (m_iss->get_immu()->translate(req) != or1kiss::MMU_OKAY)
-            return false;
-
-        paddr = req.addr;
-        return true;
     }
 
     std::string openrisc::disassemble(vcml::u64& addr, unsigned char* insn) {
@@ -168,25 +108,18 @@ namespace or1kmvp {
     }
 
     void openrisc::simulate(unsigned int& n) {
-        if ((m_gdb != NULL) && (!m_gdb->is_connected()))
-            stop_gdb();
-
         m_iss->set_clock(clock);
-        or1kiss::step_result result;
-        result = (m_gdb != NULL) ? m_gdb->step(n)
-                                 : m_iss->step(n);
-        switch (result) {
+        switch (m_iss->step(n)) {
         case or1kiss::STEP_EXIT:
             sc_core::sc_stop();
             break;
 
         case or1kiss::STEP_BREAKPOINT:
             m_iss->remove_breakpoint(get_program_counter());
-            sc_core::sc_pause();
+            gdb_notify(vcml::debugging::GDBSIG_BREAKPOINT);
             break;
 
         case or1kiss::STEP_WATCHPOINT:
-            sc_core::sc_pause();
             break;
 
         case or1kiss::STEP_OK:
@@ -267,9 +200,97 @@ namespace or1kmvp {
 
     void openrisc::end_of_elaboration() {
         vcml::processor::end_of_elaboration();
+    }
 
-        if (gdb_wait)
-            start_gdb();
+    vcml::u64 openrisc::gdb_num_registers() {
+        return 35; // 32 GPR + PPC + NPC + SR
+    }
+
+    vcml::u64 openrisc::gdb_register_width() {
+        return sizeof(m_iss->GPR[0]);
+    }
+
+    bool openrisc::gdb_read_reg(vcml::u64 idx, void* buffer, vcml::u64 size) {
+        if (idx >= gdb_num_registers())
+            return false;
+        if (size != gdb_register_width())
+            return false;
+
+        or1kiss::u32 val = 0;
+        switch (idx) {
+        case 32: val = m_iss->get_spr(or1kiss::SPR_PPC, true); break;
+        case 33: val = m_iss->get_spr(or1kiss::SPR_NPC, true); break;
+        case 34: val = m_iss->get_spr(or1kiss::SPR_SR,  true); break;
+        default: val = m_iss->GPR[idx]; break;
+        }
+
+        or1kiss::memcpyswp(buffer, &val, size);
+        return true;
+    }
+
+    bool openrisc::gdb_write_reg(vcml::u64 i, const void* buf, vcml::u64 sz) {
+        if (i >= gdb_num_registers())
+            return false;
+        if (sz != gdb_register_width())
+            return false;
+
+        or1kiss::u32 val = 0;
+        or1kiss::memcpyswp(&val, buf, sz);
+
+        switch (i) {
+        case 32: m_iss->set_spr(or1kiss::SPR_PPC, val, true); break;
+        case 33: m_iss->set_spr(or1kiss::SPR_NPC, val, true); break;
+        case 34: m_iss->set_spr(or1kiss::SPR_SR,  val, true); break;
+        default: m_iss->GPR[i] = val; break;
+        }
+
+        return true;
+    }
+
+    bool openrisc::gdb_page_size(vcml::u64& size) {
+        size = OR1KISS_PAGE_SIZE;
+        return m_iss->is_dmmu_active() || m_iss->is_immu_active();
+    }
+
+    bool openrisc::gdb_virt_to_phys(vcml::u64 va, vcml::u64& pa) {
+        if (!m_iss->is_dmmu_active() && !m_iss->is_immu_active()) {
+            pa = va;
+            return true;
+        }
+
+        or1kiss::request req;
+        req.set_imem();
+        req.set_read();
+        req.set_debug();
+        req.addr = va;
+
+        if (m_iss->get_dmmu()->translate(req) == or1kiss::MMU_OKAY) {
+            pa = req.addr;
+            return true;
+        }
+
+        if (m_iss->get_immu()->translate(req) == or1kiss::MMU_OKAY) {
+            pa = req.addr;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool openrisc::gdb_insert_breakpoint(vcml::u64 addr) {
+        if (addr > std::numeric_limits<or1kiss::u32>::max())
+            return false;
+
+        m_iss->insert_breakpoint((or1kiss::u32)addr);
+        return true;
+    }
+
+    bool openrisc::gdb_remove_breakpoint(vcml::u64 addr) {
+        if (addr > std::numeric_limits<or1kiss::u32>::max())
+            return false;
+
+        m_iss->remove_breakpoint((or1kiss::u32)addr);
+        return true;
     }
 
 }
