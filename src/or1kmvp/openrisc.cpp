@@ -16,7 +16,7 @@
  *                                                                            *
  ******************************************************************************/
 
-#include <or1kmvp/openrisc.h>
+#include "or1kmvp/openrisc.h"
 
 namespace or1kmvp {
 
