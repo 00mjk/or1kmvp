@@ -56,8 +56,8 @@ extern "C" int sc_main(int argc, char** argv) {
     logger.set_level(vcml::SEVERITY_ERROR, log_level);
     logger.set_colors();
 
-    vcml::property_provider_env  provider_env;
     vcml::property_provider_arg  provider_arg(argc, argv);
+    vcml::property_provider_env  provider_env;
     vcml::property_provider_file provider_file(config);
 
 #ifdef NDEBUG
