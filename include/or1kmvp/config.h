@@ -37,9 +37,9 @@
 #define OR1KMVP_UART_SIZE       (OR1KISS_PAGE_SIZE)
 #define OR1KMVP_UART_END        (OR1KMVP_UART_ADDR + OR1KMVP_UART_SIZE - 1)
 
-#define OR1KMVP_ETH_ADDR        (0x92000000)
-#define OR1KMVP_ETH_SIZE        (OR1KISS_PAGE_SIZE)
-#define OR1KMVP_ETH_END         (OR1KMVP_ETH_ADDR + OR1KMVP_ETH_SIZE - 1)
+#define OR1KMVP_ETHOC_ADDR      (0x92000000)
+#define OR1KMVP_ETHOC_SIZE      (OR1KISS_PAGE_SIZE)
+#define OR1KMVP_ETHOC_END       (OR1KMVP_ETHOC_ADDR + OR1KMVP_ETHOC_SIZE - 1)
 
 #define OR1KMVP_FLASH_ADDR      (0xb0000000)
 #define OR1KMVP_FLASH_SIZE      (OR1KISS_PAGE_SIZE)
@@ -54,10 +54,9 @@
 #define OR1KMVP_KB_END          (OR1KMVP_FB_ADDR + OR1KMVP_FB_SIZE - 1)
 
 /* Interrupt map */
-#define OR1KMVP_IRQ_MPIC        (1)
+#define OR1KMVP_IRQ_OMPIC       (1)
 #define OR1KMVP_IRQ_UART        (2)
-#define OR1KMVP_IRQ_ETH         (4)
-#define OR1KMVP_IRQ_KB          (5)
+#define OR1KMVP_IRQ_ETHOC       (4)
 
 /* Important memory locations */
 #define OR1KMVP_KERNEL_ADDR     (0x00000000)

@@ -35,10 +35,9 @@ namespace or1kmvp {
         vcml::property<bool> enable_insn_dmi;
         vcml::property<bool> enable_data_dmi;
 
-        vcml::property<unsigned int> irq_mpic;
+        vcml::property<unsigned int> irq_ompic;
         vcml::property<unsigned int> irq_uart;
-        vcml::property<unsigned int> irq_eth;
-        vcml::property<unsigned int> irq_kb;
+        vcml::property<unsigned int> irq_ethoc;
 
         vcml::property<std::string> insn_trace_file;
 

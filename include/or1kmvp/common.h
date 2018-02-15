@@ -47,4 +47,6 @@
 #include <vcml.h>
 #include <systemc>
 
+#define SAFE_DELETE(x) do { if (x) delete (x); (x) = NULL; } while (0)
+
 #endif

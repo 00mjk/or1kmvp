@@ -116,6 +116,67 @@ an initrd and place them in `<install-dir>/sw`. These files are referenced by
 `up.cfg` and `smp2.cfg`, so you need to name them accordingly.
 
 ----
+## Networking
+The simulator can run with networking support, if the `tunctl` program is
+available and a tap device has been created before starting the simulation.
+To do that, run the following:
+```
+sudo <install-dir>/bin/or1kmvp-net start
+<install-dir>/bin/or1kmvp -f up.cfg
+... use the simulator ...
+sudo <install-dir>/bin/or1kmvp-net stop
+```
+
+From within the simulator, you can use `arping`, `ping`, `wget` etc. to test
+the network connection. In its default configuration, the host PC has the IP
+address `10.0.0.1` and the VP uses `10.0.0.2`. The `or1kmvp-net` utility
+also sets up NAT, allowing the simulator to connect to the internet using the
+host as a gateway.
+
+From the host you can connect to a running simulator using telnet or ssh:
+```
+telnet 10.0.0.2
+ssh root@10.0.0.2
+```
+
+----
+## Debugging
+It is possible to connect GDB to a running simulation and investigate what each
+processor is doing. The debug context is bare-metal, meaning you will need
+a bare-metal debugger, i.e., `or1k-elf-gdb`. To connect to a VP running Linux,
+you can try the following (use port `55100 + coreid` when running SMP):
+```
+or1k-gdb-elf <install-dir>/sw/vmlinux-4.3.0.elf
+(gdb) target remote :55100
+(gdb) ... do stuff on core 0...
+(gdb) detach # disconnect
+(gdb) target remote :55101
+(gdb) ... do stuff on core 1...
+(gdb) kill   # terminate simulation
+```
+
+By default, the processor will not wait for GDB and instead immediatly start
+executing code. To change that, you can use the `-c system.cpu0.gdb_wait=1`
+command line switch to tell CPU0 to wait for GDB.
+Also note, that while an individual core is stopped, the SystemC simulation
+still continues and simulation time passes. To stop the entire simulation when
+a core is stopped by GDB, you can use `-c system.cpu0.gdb_sync=1`.
+
+To debug software that is running within Linux, you can simply use the
+`gdbserver` utility with an active network connection between host and
+simulator (see Networking):
+
+```
+on the VP:
+# gdbserver :54321 ./myprogram
+
+on the host using or1k-linux-gdb:
+(gdb) target remote 10.0.0.2:54321
+(gdb) ... do stuff ...
+(gdb) kill
+```
+
+----
 ## Memory Map
 This is the memory map of the system. Kernel device trees must be kept in sync
 with this.
@@ -123,7 +184,8 @@ with this.
 ```
 0: 0x00000000 .. 0x07ffffff -> memory
 1: 0x90000000 .. 0x90001fff -> uart8250
-2: 0x98000000 .. 0x98001fff -> ompic
+2: 0x92000000 .. 0x92001fff -> ethoc
+3: 0x98000000 .. 0x98001fff -> ompic
 ```
 Note that the default configuration for this system comes with 128MB of memory.
 You can increase this using the `system.mem.size` property (either via a

@@ -62,10 +62,9 @@ namespace or1kmvp {
         enable_sleep_mode("enable_sleep_mode", true),
         enable_insn_dmi("enable_insn_dmi", true),
         enable_data_dmi("enable_data_dmi", false),
-        irq_mpic("irq_mpic", OR1KMVP_IRQ_MPIC),
+        irq_ompic("irq_ompic", OR1KMVP_IRQ_OMPIC),
         irq_uart("irq_uart", OR1KMVP_IRQ_UART),
-        irq_eth("irq_eth", OR1KMVP_IRQ_ETH),
-        irq_kb("irq_kb", OR1KMVP_IRQ_KB),
+        irq_ethoc("irq_ethoc", OR1KMVP_IRQ_ETHOC),
         insn_trace_file("insn_trace_file", "") {
         or1kiss::decode_cache_size sz;
         sz = enable_decode_cache ? or1kiss::DECODE_CACHE_SIZE_8M
@@ -178,15 +177,19 @@ namespace or1kmvp {
         }
 
         tlm::tlm_dmi dmi;
-        if (get_dmi().lookup(req.addr, req.addr + req.size -1,
-                             tlm::TLM_READ_COMMAND, dmi)) {
-            if (enable_data_dmi && req.is_dmem()) {
+        if (req.is_dmem() && enable_data_dmi && !get_data_ptr(req.addr)) {
+            if (DATA.dmi().lookup(req.addr, req.addr + req.size - 1,
+                                  tlm::TLM_READ_COMMAND, dmi)) {
                 set_data_ptr(dmi.get_dmi_ptr(),
                              dmi.get_start_address(),
                              dmi.get_end_address());
-            }
 
-            if (enable_insn_dmi && req.is_imem()) {
+            }
+        }
+
+        if (req.is_imem() && enable_insn_dmi && !get_insn_ptr(req.addr)) {
+            if (INSN.dmi().lookup(req.addr, req.addr + req.size - 1,
+                                  tlm::TLM_READ_COMMAND, dmi)) {
                 set_insn_ptr(dmi.get_dmi_ptr(),
                              dmi.get_start_address(),
                              dmi.get_end_address());

@@ -68,6 +68,7 @@ extern "C" int sc_main(int argc, char** argv) {
 
     try {
         or1kmvp::system system("system");
+        system.construct();
         system.run();
         system.log_timing_stats();
     } catch (vcml::report& r) {

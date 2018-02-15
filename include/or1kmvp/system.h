@@ -31,7 +31,7 @@ namespace or1kmvp {
         struct timeval m_sim_start;
         struct timeval m_sim_end;
 
-        std::vector<openrisc*>  m_cpus;
+        std::vector<openrisc*> m_cpus;
 
         void build_processors();
         void clean_processors();
@@ -40,15 +40,20 @@ namespace or1kmvp {
         vcml::generic::memory*   m_mem;
         vcml::generic::uart8250* m_uart;
         vcml::opencores::ompic*  m_ompic;
+        vcml::opencores::ethoc*  m_ethoc;
 
         void build_components();
         void clean_components();
 
-        vcml::generic::crossbar*  m_xbar_uart;
-        sc_core::sc_signal<bool>* m_irq_uart;
+        vcml::generic::crossbar* m_xbar_uart;
+        vcml::generic::crossbar* m_xbar_ethoc;
 
-        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_mpic;
+        sc_core::sc_signal<bool>* m_irq_uart;
+        sc_core::sc_signal<bool>* m_irq_ethoc;
+
         std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_uart;
+        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_ethoc;
+        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_ompic;
 
         void build_interrupts();
         void clean_interrupts();
@@ -65,10 +70,12 @@ namespace or1kmvp {
         vcml::property<vcml::range> mem;
         vcml::property<vcml::range> uart;
         vcml::property<vcml::range> ompic;
+        vcml::property<vcml::range> ethoc;
 
         system(const sc_core::sc_module_name& name);
         virtual ~system();
 
+        void construct();
         void run();
 
         void log_timing_stats() const;
