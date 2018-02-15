@@ -21,16 +21,15 @@
 ethdev="eth1"
 tapdev="tap0"
 ipaddr="10.0.0.1"
-name=`logname`
 
 if ! [ -x "$(command -v tunctl)" ]; then
-  echo 'Error: tunctl is not installed.' >&2
-  exit 1
+    echo 'Error: tunctl (uml-utilities) is not installed.' >&2
+    exit 1
 fi
 
-if [[ $EUID -ne 0 ]]; then
-  echo "You must be a root user" 2>&1
-  exit 1
+if [ -z $SUDO_USER ]; then
+    echo "Error: please run with sudo, e.g. 'sudo $0 $@'" >&2
+    exit 1
 fi
 
 start() {
@@ -45,8 +44,8 @@ start() {
     read -p "Specify local NAT IP for host:  " -ei $ipaddr ipaddr
 
     # create a TAP device for the current user (needs root priv.)
-    echo "Starting $tapdev with IP address $ipaddr"
-    tunctl -t $tapdev -u `logname`
+    echo "Starting $tapdev with IP address $ipaddr for user $SUDO_USER"
+    tunctl -t $tapdev -u $SUDO_USER
 
     # assign local (NAT) IP address
     ifconfig $tapdev $ipaddr promisc up
