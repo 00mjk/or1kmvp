@@ -15,19 +15,19 @@
  # limitations under the License.                                             #
  #                                                                            #
  ##############################################################################
- 
+
 find_path(VCML_INCLUDE_DIRS NAMES vcml.h
           HINTS $ENV{VCML_HOME}/include /opt/vcml/include)
-           
+
 find_library(VCML_LIBRARIES NAMES vcml
              HINTS $ENV{VCML_HOME}/lib /opt/vcml/lib)
-             
+
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(VCML DEFAULT_MSG
                                   VCML_LIBRARIES
                                   VCML_INCLUDE_DIRS)
 
-mark_as_advanced(VCML_INCLUDE_DIRS VCML_LIBRARIES)
+mark_as_advanced(VCML_HOME VCML_INCLUDE_DIRS VCML_LIBRARIES)
 
 #message(STATUS "VCML_FOUND        " ${VCML_FOUND})
 #message(STATUS "VCML_INCLUDE_DIRS " ${VCML_INCLUDE_DIRS})
