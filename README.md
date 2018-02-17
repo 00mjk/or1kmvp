@@ -117,23 +117,23 @@ an initrd and place them in `<install-dir>/sw`. These files are referenced by
 
 ----
 ## Networking
-The simulator can run with networking support, if the `tunctl` program is
-available and a tap device has been created before starting the simulation.
-To do that, run the following:
+The simulator can run with networking support, if a tap device has been created
+before starting the simulation. Assuming one of the default platform config
+files is being used, you can run the following commands to enable networking:
 ```
-sudo <install-dir>/bin/or1kmvp-net start
+sudo <install-dir>/bin/or1kmvp-tapnet start tap0
 <install-dir>/bin/or1kmvp -f up.cfg
 ... use the simulator ...
-sudo <install-dir>/bin/or1kmvp-net stop
+sudo <install-dir>/bin/or1kmvp-tapnet stop tap0
 ```
 
 From within the simulator, you can use `arping`, `ping`, `wget` etc. to test
 the network connection. In its default configuration, the host PC has the IP
-address `10.0.0.1` and the VP uses `10.0.0.2`. The `or1kmvp-net` utility
+address `10.0.0.1` and the VP uses `10.0.0.2`. The `or1kmvp-tapnet` utility
 also sets up NAT, allowing the simulator to connect to the internet using the
 host as a gateway.
 
-From the host you can connect to a running simulator using telnet or ssh:
+From the host you can connect to a running simulator using `telnet` or `ssh`:
 ```
 telnet 10.0.0.2
 ssh root@10.0.0.2
