@@ -53,9 +53,14 @@ target_link_libraries(or1kmvp -pthread)
 
 install(TARGETS or1kmvp DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
-install(FILES scripts/or1kmvp-net DESTINATION bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sw/)
-   install(DIRECTORY sw/ DESTINATION sw)
+    install(DIRECTORY sw/ DESTINATION sw)
 endif()
+
+foreach(util tapctl tapnet)
+    set(usrc $ENV{VCML_HOME}/bin/vcml-${util})
+    if (EXISTS ${usrc})
+        install(PROGRAMS ${usrc} DESTINATION bin RENAME or1kmvp-${util})
+    endif()
+endforeach()
