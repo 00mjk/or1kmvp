@@ -208,4 +208,10 @@ namespace or1kmvp {
             cpu->log_timing_info();
     }
 
+    void system::end_of_elaboration() {
+        std::stringstream ss;
+        m_bus->execute("show", VCML_NO_ARGS, ss);
+        vcml::log_debug(ss.str().c_str());
+    }
+
 }
