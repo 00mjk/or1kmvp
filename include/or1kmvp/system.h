@@ -79,6 +79,8 @@ namespace or1kmvp {
         void run();
 
         void log_timing_stats() const;
+
+        virtual void end_of_elaboration() override;
     };
 
 }
