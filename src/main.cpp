@@ -32,14 +32,14 @@ void exit_usage() {
 }
 
 extern "C" int sc_main(int argc, char** argv) {
-    vcml::severity log_level = vcml::SEVERITY_INFO;
+    vcml::log_level log_level = vcml::LOG_INFO;
     std::string config;
 
     // parse command line
     for (int i = 1; i < argc; i++) {
         if ((strcmp(argv[i], "--debug") == 0) ||
             (strcmp(argv[i],      "-d") == 0)) {
-            log_level = vcml::SEVERITY_DEBUG;
+            log_level = vcml::LOG_DEBUG;
         } else if ((strcmp(argv[i], "--file") == 0) ||
                    (strcmp(argv[i],     "-f") == 0)) {
             if (++i < argc)
@@ -53,7 +53,7 @@ extern "C" int sc_main(int argc, char** argv) {
     }
 
     vcml::log_term logger;
-    logger.set_level(vcml::SEVERITY_ERROR, log_level);
+    logger.set_level(vcml::LOG_ERROR, log_level);
     logger.set_colors();
 
     vcml::property_provider_arg  provider_arg(argc, argv);
