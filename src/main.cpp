@@ -24,6 +24,7 @@ void exit_usage() {
 #define PRINT(...) fprintf(stderr, ##__VA_ARGS__)
     PRINT("Usage: soc [optional arguments]\n");
     PRINT("  -d | --debug          Switch on debug logging\n");
+    PRINT("  -t | --trace          Switch on trace logging\n");
     PRINT("  -f | --file   <file>  Read config from <file>\n");
     PRINT("  -c | --config <x>=<y> Set property <x> to value <y>\n");
     PRINT("  -h | --help           Prints this message\n");
@@ -31,7 +32,8 @@ void exit_usage() {
     exit(EXIT_FAILURE);
 }
 
-extern "C" int sc_main(int argc, char** argv) {
+extern "C" int sc_main(int argc, char** argv)  try {
+    vcml::report::report_segfaults();
     vcml::log_level log_level = vcml::LOG_INFO;
     std::string config;
 
@@ -40,6 +42,9 @@ extern "C" int sc_main(int argc, char** argv) {
         if ((strcmp(argv[i], "--debug") == 0) ||
             (strcmp(argv[i],      "-d") == 0)) {
             log_level = vcml::LOG_DEBUG;
+        } else if ((strcmp(argv[i], "--trace") == 0) ||
+                   (strcmp(argv[i],      "-t") == 0)) {
+            log_level = vcml::LOG_TRACE;
         } else if ((strcmp(argv[i], "--file") == 0) ||
                    (strcmp(argv[i],     "-f") == 0)) {
             if (++i < argc)
@@ -66,18 +71,16 @@ extern "C" int sc_main(int argc, char** argv) {
                                             sc_core::SC_DO_NOTHING);
 #endif
 
-    try {
-        or1kmvp::system system("system");
-        system.construct();
-        system.run();
-        system.log_timing_stats();
-    } catch (vcml::report& r) {
-        vcml::logger::log(r);
-        return EXIT_FAILURE;
-    } catch (std::exception& e) {
-        vcml::log_error(e.what());
-        return EXIT_FAILURE;
-    }
-
+    or1kmvp::system system("system");
+    system.construct();
+    system.run();
+    system.log_timing_stats();
     return EXIT_SUCCESS;
+
+} catch (vcml::report& r) {
+    vcml::logger::log(r);
+    return EXIT_FAILURE;
+} catch (std::exception& e) {
+    vcml::log_error(e.what());
+    return EXIT_FAILURE;
 }
