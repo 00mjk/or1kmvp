@@ -151,6 +151,8 @@ namespace or1kmvp {
         m_irq_percpu_uart(),
         m_irq_percpu_ethoc(),
         m_irq_percpu_ompic(),
+        session("session", 0),
+        vspdebug("vspdebug", false),
         quantum("quantum", sc_core::sc_time(1, sc_core::SC_US)),
         duration("duration", sc_core::SC_ZERO_TIME),
         nrcpu("nrcpu", 1),
@@ -183,7 +185,13 @@ namespace or1kmvp {
 
     void system::run() {
         tlm::tlm_global_quantum::instance().set(quantum);
-        if (duration != sc_core::SC_ZERO_TIME) {
+        if (session > 0) {
+            gettimeofday(&m_sim_start, NULL);
+            vcml::debugging::vspserver vspsession(session);
+            vspsession.echo(vspdebug);
+            vspsession.start();
+            gettimeofday(&m_sim_end, NULL);
+        } else if (duration != sc_core::SC_ZERO_TIME) {
             gettimeofday(&m_sim_start, NULL);
             sc_core::sc_start(duration);
             gettimeofday(&m_sim_end, NULL);
@@ -202,7 +210,8 @@ namespace or1kmvp {
         vcml::log_info("simulation stopped");
         vcml::log_info("  duration     : %.9fs", duration);
         vcml::log_info("  time         : %.4fs", realtime);
-        vcml::log_info("  time ratio   : %.2fs / 1s", realtime / duration);
+        vcml::log_info("  time ratio   : %.2fs / 1s", duration == 0.0 ? 0.0 :
+                                                      realtime / duration);
 
         for (auto cpu : m_cpus)
             cpu->log_timing_info();

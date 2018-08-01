@@ -21,16 +21,19 @@
 namespace or1kmvp {
 
     void openrisc::log_timing_info() const {
+        double rt = get_run_time();
+        vcml::u64 nc = get_num_cycles();
+
         vcml::log_info("processor '%s'", name());
         vcml::log_info("  clock speed  : %.1f MHz", clock / 1e6);
-        vcml::log_info("  sim speed    : %.1f MIPS",
-                       m_iss->get_num_instructions() / get_run_time() * 1e-6);
+        vcml::log_info("  sim speed    : %.1f MIPS", rt == 0.0 ? 0.0 :
+                       m_iss->get_num_instructions() / rt * 1e-6);
         vcml::log_info("  instructions : %" PRId64,
                        m_iss->get_num_instructions());
-        vcml::log_info("  cycles       : %" PRId64, get_num_cycles());
+        vcml::log_info("  cycles       : %" PRId64, nc);
         vcml::log_info("  sleep-cycles : %" PRId64 " (%.1f%%)",
-                       m_iss->get_num_sleep_cycles(),
-                       m_iss->get_num_sleep_cycles() / get_num_cycles() * 100);
+                       m_iss->get_num_sleep_cycles(), nc == 0 ? 0.0 :
+                       m_iss->get_num_sleep_cycles() / (nc * 100.0));
         vcml::log_info("  jit hit-rate : %.4f",
                        m_iss->get_decode_cache_hit_rate());
         vcml::log_info("  #lwa         : %" PRId64, m_iss->get_num_lwa());

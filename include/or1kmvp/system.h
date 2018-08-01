@@ -62,6 +62,9 @@ namespace or1kmvp {
         void connect_irq();
 
     public:
+        vcml::property<unsigned short> session;
+        vcml::property<bool> vspdebug;
+
         vcml::property<sc_core::sc_time> quantum;
         vcml::property<sc_core::sc_time> duration;
 
