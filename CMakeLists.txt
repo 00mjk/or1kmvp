@@ -58,6 +58,8 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sw/)
     install(DIRECTORY sw/ DESTINATION sw)
 endif()
 
+add_subdirectory(utils)
+
 foreach(util tapctl tapnet)
     set(usrc $ENV{VCML_HOME}/bin/vcml-${util})
     if (EXISTS ${usrc})

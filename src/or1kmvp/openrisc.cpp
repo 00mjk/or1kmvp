@@ -20,6 +20,31 @@
 
 namespace or1kmvp {
 
+    bool openrisc::cmd_gdb(const std::vector<std::string>& args,
+                           std::ostream& os) {
+        if (!vcml::file_exists(gdb_term)) {
+            os << "gdbterm not found at " << gdb_term.str() << std::endl;
+            return false;
+        }
+
+        std::stringstream ss;
+        ss << gdb_term.str()  << " " << name() << " localhost "
+           << gdb_port.str() << " " << symbols.str();
+
+        log_debug("gdbterm command line:");
+        log_debug("'%s'", ss.str().c_str());
+
+        int res = system(ss.str().c_str());
+        if (res == -1) {
+            log_error("failed to start gdb shell");
+            os << "failed to start gdb shell";
+            return false;
+        }
+
+        os << "started gdb shell on port " << gdb_port.str();
+        return true;
+    }
+
     void openrisc::log_timing_info() const {
         double rt = get_run_time();
         vcml::u64 nc = get_num_cycles();
@@ -68,7 +93,8 @@ namespace or1kmvp {
         irq_ompic("irq_ompic", OR1KMVP_IRQ_OMPIC),
         irq_uart("irq_uart", OR1KMVP_IRQ_UART),
         irq_ethoc("irq_ethoc", OR1KMVP_IRQ_ETHOC),
-        insn_trace_file("insn_trace_file", "") {
+        insn_trace_file("insn_trace_file", ""),
+        gdb_term("gdb_term", "or1kmvp-gdbterm") {
         or1kiss::decode_cache_size sz;
         sz = enable_decode_cache ? or1kiss::DECODE_CACHE_SIZE_8M
                                  : or1kiss::DECODE_CACHE_OFF;
@@ -81,6 +107,9 @@ namespace or1kmvp {
 
         if (!insn_trace_file.get().empty())
             m_iss->trace(insn_trace_file);
+
+        register_command("gdb", 0, this, &openrisc::cmd_gdb,
+                         "opens a new gdb debug session");
     }
 
     openrisc::~openrisc() {

@@ -29,6 +29,8 @@ namespace or1kmvp {
     private:
         or1kiss::or1k* m_iss;
 
+        bool cmd_gdb(const std::vector<std::string>& args, std::ostream& os);
+
     public:
         vcml::property<bool> enable_decode_cache;
         vcml::property<bool> enable_sleep_mode;
@@ -40,6 +42,7 @@ namespace or1kmvp {
         vcml::property<unsigned int> irq_ethoc;
 
         vcml::property<std::string> insn_trace_file;
+        vcml::property<std::string> gdb_term;
 
         void log_timing_info() const;
 
