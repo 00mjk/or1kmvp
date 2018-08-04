@@ -185,27 +185,24 @@ namespace or1kmvp {
 
     void system::run() {
         tlm::tlm_global_quantum::instance().set(quantum);
+        m_sim_start = vcml::realtime();
+
         if (session > 0) {
-            gettimeofday(&m_sim_start, NULL);
             vcml::debugging::vspserver vspsession(session);
             vspsession.echo(vspdebug);
             vspsession.start();
-            gettimeofday(&m_sim_end, NULL);
         } else if (duration != sc_core::SC_ZERO_TIME) {
-            gettimeofday(&m_sim_start, NULL);
             sc_core::sc_start(duration);
-            gettimeofday(&m_sim_end, NULL);
         } else {
-            gettimeofday(&m_sim_start, NULL);
             sc_core::sc_start();
-            gettimeofday(&m_sim_end, NULL);
         }
+
+        m_sim_end = vcml::realtime();
     }
 
     void system::log_timing_stats() const {
         double duration = sc_core::sc_time_stamp().to_seconds();
-        double realtime = (m_sim_end.tv_sec  - m_sim_start.tv_sec) +
-                          (m_sim_end.tv_usec - m_sim_start.tv_usec) / 1e6;
+        double realtime = m_sim_end  - m_sim_start;
 
         vcml::log_info("simulation stopped");
         vcml::log_info("  duration     : %.9fs", duration);

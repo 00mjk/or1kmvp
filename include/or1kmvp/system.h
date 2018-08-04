@@ -28,8 +28,8 @@ namespace or1kmvp {
     class system: public sc_core::sc_module
     {
     private:
-        struct timeval m_sim_start;
-        struct timeval m_sim_end;
+        double m_sim_start;
+        double m_sim_end;
 
         std::vector<openrisc*> m_cpus;
 
