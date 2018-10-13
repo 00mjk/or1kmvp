@@ -241,14 +241,14 @@ namespace or1kmvp {
         return 35; // 32 GPR + PPC + NPC + SR
     }
 
-    vcml::u64 openrisc::gdb_register_width() {
+    vcml::u64 openrisc::gdb_register_width(vcml::u64 idx) {
         return sizeof(m_iss->GPR[0]);
     }
 
     bool openrisc::gdb_read_reg(vcml::u64 idx, void* buffer, vcml::u64 size) {
         if (idx >= gdb_num_registers())
             return false;
-        if (size != gdb_register_width())
+        if (size != gdb_register_width(idx))
             return false;
 
         or1kiss::u32 val = 0;
@@ -266,7 +266,7 @@ namespace or1kmvp {
     bool openrisc::gdb_write_reg(vcml::u64 i, const void* buf, vcml::u64 sz) {
         if (i >= gdb_num_registers())
             return false;
-        if (sz != gdb_register_width())
+        if (sz != gdb_register_width(i))
             return false;
 
         or1kiss::u32 val = 0;

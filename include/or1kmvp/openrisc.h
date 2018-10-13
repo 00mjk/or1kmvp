@@ -63,7 +63,7 @@ namespace or1kmvp {
         virtual void end_of_elaboration() override;
 
         virtual vcml::u64 gdb_num_registers() override;
-        virtual vcml::u64 gdb_register_width() override;
+        virtual vcml::u64 gdb_register_width(vcml::u64 reg) override;
 
         virtual bool gdb_read_reg  (vcml::u64 reg, void* buffer,
                                     vcml::u64 size) override;
