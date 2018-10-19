@@ -60,8 +60,6 @@ namespace or1kmvp {
 
         virtual or1kiss::response transact(const or1kiss::request& r) override;
 
-        virtual void end_of_elaboration() override;
-
         virtual vcml::u64 gdb_num_registers() override;
         virtual vcml::u64 gdb_register_width(vcml::u64 reg) override;
 

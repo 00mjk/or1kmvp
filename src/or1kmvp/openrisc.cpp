@@ -159,16 +159,6 @@ namespace or1kmvp {
         }
     }
 
-    static const char* g_buserror =
-        "bus error\n"
-        "  addr : 0x%08" PRIx32 " (%s)\n"
-        "  pc   : 0x%08" PRIx32 "\n"
-        "  sp   : 0x%08" PRIx32 "\n"
-        "  size : %d bytes\n"
-        "  core : %d\n"
-        "  port : %s\n"
-        "  code : %s";
-
     or1kiss::response openrisc::transact(const or1kiss::request& req) {
         int flags = vcml::VCML_FLAG_NONE;
         if (req.is_debug())
@@ -194,17 +184,8 @@ namespace or1kmvp {
 
         // Check bus error
         if (rs != tlm::TLM_OK_RESPONSE) {
-            if (!req.is_debug()) {
-                char str[256];
-                snprintf(str, sizeof(str), g_buserror, req.addr,
-                         req.is_write() ? "write" : "read",
-                         m_iss->get_spr(or1kiss::SPR_NPC, true), m_iss->GPR[1],
-                         req.size, m_iss->get_core_id(),
-                         req.is_imem() ? "INSN" : "DATA",
-                         vcml::tlm_response_to_str(rs).c_str());
-                vcml::log_debug(str);
-            }
-
+            log_bus_error(port, req.is_read() ? vcml::VCML_ACCESS_READ :
+                          vcml::VCML_ACCESS_WRITE, rs, req.addr, req.size);
             return or1kiss::RESP_ERROR;
         }
 
@@ -231,10 +212,6 @@ namespace or1kmvp {
         if (req.is_exclusive() && (nbytes != req.size))
             return or1kiss::RESP_FAILED;
         return or1kiss::RESP_SUCCESS;
-    }
-
-    void openrisc::end_of_elaboration() {
-        vcml::processor::end_of_elaboration();
     }
 
     vcml::u64 openrisc::gdb_num_registers() {
