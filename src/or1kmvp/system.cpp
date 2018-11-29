@@ -20,195 +20,119 @@
 
 namespace or1kmvp {
 
-    void system::build_processors() {
-        m_cpus.resize(nrcpu);
-        for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
-            std::stringstream ss; ss << "cpu" << cpu;
-            m_cpus[cpu] = new openrisc(ss.str().c_str(), cpu);
-        }
-    }
-
-    void system::clean_processors() {
-        for (auto cpu : m_cpus)
-            SAFE_DELETE(cpu);
-    }
-
-    void system::build_components() {
-        m_bus   = new vcml::generic::bus("bus");
-        m_mem   = new vcml::generic::memory("mem", mem.get().length());
-        m_uart  = new vcml::generic::uart8250("uart");
-        m_ompic = new vcml::opencores::ompic("ompic", nrcpu);
-        m_ethoc = new vcml::opencores::ethoc("ethoc");
-
-        m_uart->set_big_endian();
-        m_ompic->set_big_endian();
-        m_ethoc->set_big_endian();
-    }
-
-    void system::clean_components() {
-        SAFE_DELETE(m_bus);
-        SAFE_DELETE(m_mem);
-        SAFE_DELETE(m_uart);
-        SAFE_DELETE(m_ompic);
-        SAFE_DELETE(m_ethoc);
-    }
-
-    void system::build_interrupts() {
-        m_xbar_uart  = new vcml::generic::crossbar("xbar_uart");
-        m_xbar_ethoc = new vcml::generic::crossbar("xbar_ethoc");
-
-        m_xbar_uart->set_big_endian();
-        m_xbar_ethoc->set_big_endian();
-
-        m_irq_uart  = new sc_core::sc_signal<bool>("irq_uart");
-        m_irq_ethoc = new sc_core::sc_signal<bool>("irq_ethoc");
-
-        m_irq_percpu_uart.resize(nrcpu);
-        m_irq_percpu_ethoc.resize(nrcpu);
-        m_irq_percpu_ompic.resize(nrcpu);
-
-        std::stringstream ss;
-        for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
-            ss.str(""); ss << "irq_percpu_uart" << cpu;
-            m_irq_percpu_uart[cpu] = new sc_core::sc_signal<bool>(ss.str().c_str());
-
-            ss.str(""); ss << "irq_percpu_ethoc" << cpu;
-            m_irq_percpu_ethoc[cpu] = new sc_core::sc_signal<bool>(ss.str().c_str());
-
-            ss.str(""); ss << "irq_percpu_mpic_" << cpu;
-            m_irq_percpu_ompic[cpu] = new sc_core::sc_signal<bool>(ss.str().c_str());
-        }
-    }
-
-    void system::clean_interrupts() {
-        SAFE_DELETE(m_xbar_uart);
-        SAFE_DELETE(m_xbar_ethoc);
-
-        SAFE_DELETE(m_irq_uart);
-        SAFE_DELETE(m_irq_ethoc);
-
-        for (auto irq : m_irq_percpu_uart)
-            SAFE_DELETE(irq);
-        for (auto irq : m_irq_percpu_ethoc)
-            SAFE_DELETE(irq);
-        for (auto irq : m_irq_percpu_ompic)
-            SAFE_DELETE(irq);
-    }
-
-    void system::connect_bus() {
-        for (openrisc* cpu : m_cpus) {
-           m_bus->bind(cpu->INSN);
-           m_bus->bind(cpu->DATA);
-        }
-
-        m_bus->bind(m_mem->IN, mem);
-        m_bus->bind(m_uart->IN, uart);
-        m_bus->bind(m_ompic->IN, ompic);
-        m_bus->bind(m_ethoc->IN, ethoc);
-        m_bus->bind(m_ethoc->OUT);
-    }
-
-    void system::connect_irq() {
-        m_uart->IRQ.bind(*m_irq_uart);
-        m_ethoc->IRQ.bind(*m_irq_ethoc);
-
-        m_xbar_uart->IN[0].bind(*m_irq_uart);
-        m_xbar_ethoc->IN[0].bind(*m_irq_ethoc);
-
-        for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
-            m_xbar_uart->OUT[cpu].bind(*m_irq_percpu_uart[cpu]);
-            m_xbar_ethoc->OUT[cpu].bind(*m_irq_percpu_ethoc[cpu]);
-
-            m_xbar_uart->set_broadcast(cpu);
-            m_xbar_ethoc->set_broadcast(cpu);
-
-            unsigned int irq_uart  = m_cpus[cpu]->irq_uart;
-            unsigned int irq_ethoc = m_cpus[cpu]->irq_ethoc;
-            unsigned int irq_ompic = m_cpus[cpu]->irq_ompic;
-
-            m_cpus[cpu]->IRQ[irq_uart].bind(*m_irq_percpu_uart[cpu]);
-            m_cpus[cpu]->IRQ[irq_ethoc].bind(*m_irq_percpu_ethoc[cpu]);
-            m_cpus[cpu]->IRQ[irq_ompic].bind(*m_irq_percpu_ompic[cpu]);
-
-            m_ompic->IRQ[cpu].bind(*m_irq_percpu_ompic[cpu]);
-        }
-    }
-
     system::system(const sc_core::sc_module_name& nm):
-        sc_core::sc_module(nm),
-        m_sim_start(),
-        m_sim_end(),
-        m_cpus(),
-        m_bus(NULL),
-        m_mem(NULL),
-        m_uart(NULL),
-        m_ompic(NULL),
-        m_ethoc(NULL),
-        m_xbar_uart(NULL),
-        m_xbar_ethoc(NULL),
-        m_irq_uart(NULL),
-        m_irq_ethoc(NULL),
-        m_irq_percpu_uart(),
-        m_irq_percpu_ethoc(),
-        m_irq_percpu_ompic(),
+        vcml::component(nm),
         session("session", 0),
         vspdebug("vspdebug", false),
         quantum("quantum", sc_core::sc_time(1, sc_core::SC_US)),
         duration("duration", sc_core::SC_ZERO_TIME),
         nrcpu("nrcpu", 1),
         mem("mem", vcml::range(OR1KMVP_MEM_ADDR, OR1KMVP_MEM_END)),
-        uart("uart",  vcml::range(OR1KMVP_UART_ADDR, OR1KMVP_UART_END)),
+        uart0("uart0", vcml::range(OR1KMVP_UART0_ADDR, OR1KMVP_UART0_END)),
+        uart1("uart1", vcml::range(OR1KMVP_UART1_ADDR, OR1KMVP_UART1_END)),
+        ethoc("ethoc", vcml::range(OR1KMVP_ETHOC_ADDR, OR1KMVP_ETHOC_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
-        ethoc("ethoc", vcml::range(OR1KMVP_ETHOC_ADDR, OR1KMVP_ETHOC_END)) {
+        m_cpus(nrcpu),
+        m_bus("bus"),
+        m_mem("mem", mem.get().length()),
+        m_uart0("uart0"),
+        m_uart1("uart1"),
+        m_ethoc("ethoc"),
+        m_ompic("ompic", nrcpu),
+        m_irq_uart0("irq_uart0"),
+        m_irq_uart1("irq_uart1"),
+        m_irq_ethoc("irq_ethoc"),
+        m_irq_ompic(nrcpu) {
+
+        m_uart0.set_big_endian();
+        m_uart1.set_big_endian();
+        m_ethoc.set_big_endian();
+        m_ompic.set_big_endian();
+
+        for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
+            std::stringstream ss; ss << "cpu" << cpu;
+            m_cpus[cpu] = new openrisc(ss.str().c_str(), cpu);
+        }
+
+        // Bus mapping
+        for (openrisc* cpu : m_cpus) {
+           m_bus.bind(cpu->INSN);
+           m_bus.bind(cpu->DATA);
+        }
+
+        m_bus.bind(m_mem.IN, mem);
+        m_bus.bind(m_uart0.IN, uart0);
+        m_bus.bind(m_uart1.IN, uart1);
+        m_bus.bind(m_ompic.IN, ompic);
+        m_bus.bind(m_ethoc.IN, ethoc);
+        m_bus.bind(m_ethoc.OUT);
+
+        // IRQ mapping
+        m_uart0.IRQ.bind(m_irq_uart0);
+        m_uart1.IRQ.bind(m_irq_uart1);
+        m_ethoc.IRQ.bind(m_irq_ethoc);
+
+        for (auto cpu : m_cpus) {
+            unsigned int irq_uart0 = cpu->irq_uart0;
+            unsigned int irq_uart1 = cpu->irq_uart1;
+            unsigned int irq_ethoc = cpu->irq_ethoc;
+            unsigned int irq_ompic = cpu->irq_ompic;
+
+            cpu->IRQ[irq_uart0].bind(m_irq_uart0);
+            cpu->IRQ[irq_uart1].bind(m_irq_uart1);
+            cpu->IRQ[irq_ethoc].bind(m_irq_ethoc);
+
+            vcml::u64 id = cpu->get_core_id();
+            std::stringstream ss; ss << "irq_ompic_cpu" << id;
+            m_irq_ompic[id] = new sc_core::sc_signal<bool>(ss.str().c_str());
+            cpu->IRQ[irq_ompic].bind(*m_irq_ompic[id]);
+            m_ompic.IRQ[id].bind(*m_irq_ompic[id]);
+        }
     }
 
     system::~system() {
-        clean_interrupts();
-        clean_components();
-        clean_processors();
-    }
-
-    void system::construct() {
-        sc_core::sc_simcontext* simc = sc_core::sc_get_curr_simcontext();
-        VCML_ERROR_ON(!simc, "no simulation context");
-        simc->hierarchy_push(this);
-
-        build_processors();
-        build_components();
-        build_interrupts();
-
-        connect_bus();
-        connect_irq();
-
-        simc->hierarchy_pop();
+        for (auto irq : m_irq_ompic)
+            SAFE_DELETE(irq);
+        for (auto cpu : m_cpus)
+            SAFE_DELETE(cpu);
     }
 
     void system::run() {
         tlm::tlm_global_quantum::instance().set(quantum);
-        m_sim_start = vcml::realtime();
-
         if (session > 0) {
             vcml::debugging::vspserver vspsession(session);
             vspsession.echo(vspdebug);
             vspsession.start();
         } else if (duration != sc_core::SC_ZERO_TIME) {
+            log_info("starting simulation until %s using %s quantum",
+                           duration.get().to_string().c_str(),
+                           quantum.get().to_string().c_str());
             sc_core::sc_start(duration);
+            log_info("simulation stopped");
         } else {
+            log_info("starting infinite simulation using %s quantum",
+                           quantum.get().to_string().c_str());
             sc_core::sc_start();
+            log_info("simulation stopped");
         }
-
-        m_sim_end = vcml::realtime();
     }
 
-    void system::log_timing_stats() const {
+    void system::run_timed() {
+        double simstart = vcml::realtime();
+        run();
+        double realtime = vcml::realtime() - simstart;
         double duration = sc_core::sc_time_stamp().to_seconds();
-        double realtime = m_sim_end  - m_sim_start;
 
-        vcml::log_info("simulation stopped");
-        vcml::log_info("  duration     : %.9fs", duration);
-        vcml::log_info("  time         : %.4fs", realtime);
-        vcml::log_info("  time ratio   : %.2fs / 1s", duration == 0.0 ? 0.0 :
-                                                      realtime / duration);
+        log_info("duration           %.9fs", duration);
+        log_info("runtime            %.4fs", realtime);
+        log_info("real time ratio    %.2fs / 1s", duration == 0.0 ? 0.0 :
+                                                  realtime / duration);
+
+        vcml::u64 ninsn = 0;
+        for (auto cpu : m_cpus)
+            ninsn += cpu->insn_count();
+        log_info("sim speed          %.1f MIPS", realtime == 0.0 ? 0.0 :
+                                                 ninsn / realtime / 1e6);
 
         for (auto cpu : m_cpus)
             cpu->log_timing_info();
@@ -216,7 +140,7 @@ namespace or1kmvp {
 
     void system::end_of_elaboration() {
         std::stringstream ss;
-        m_bus->execute("show", VCML_NO_ARGS, ss);
+        m_bus.execute("show", VCML_NO_ARGS, ss);
         vcml::log_debug(ss.str().c_str());
     }
 

@@ -38,12 +38,14 @@ namespace or1kmvp {
         vcml::property<bool> enable_data_dmi;
 
         vcml::property<unsigned int> irq_ompic;
-        vcml::property<unsigned int> irq_uart;
+        vcml::property<unsigned int> irq_uart0;
+        vcml::property<unsigned int> irq_uart1;
         vcml::property<unsigned int> irq_ethoc;
 
         vcml::property<std::string> insn_trace_file;
         vcml::property<std::string> gdb_term;
 
+        vcml::u64 insn_count() const { return m_iss->get_num_instructions(); }
         void log_timing_info() const;
 
         openrisc(const sc_core::sc_module_name& nm, unsigned int coreid);

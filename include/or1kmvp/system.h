@@ -25,42 +25,8 @@
 
 namespace or1kmvp {
 
-    class system: public sc_core::sc_module
+    class system: public vcml::component
     {
-    private:
-        double m_sim_start;
-        double m_sim_end;
-
-        std::vector<openrisc*> m_cpus;
-
-        void build_processors();
-        void clean_processors();
-
-        vcml::generic::bus*      m_bus;
-        vcml::generic::memory*   m_mem;
-        vcml::generic::uart8250* m_uart;
-        vcml::opencores::ompic*  m_ompic;
-        vcml::opencores::ethoc*  m_ethoc;
-
-        void build_components();
-        void clean_components();
-
-        vcml::generic::crossbar* m_xbar_uart;
-        vcml::generic::crossbar* m_xbar_ethoc;
-
-        sc_core::sc_signal<bool>* m_irq_uart;
-        sc_core::sc_signal<bool>* m_irq_ethoc;
-
-        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_uart;
-        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_ethoc;
-        std::vector<sc_core::sc_signal<bool>*> m_irq_percpu_ompic;
-
-        void build_interrupts();
-        void clean_interrupts();
-
-        void connect_bus();
-        void connect_irq();
-
     public:
         vcml::property<unsigned short> session;
         vcml::property<bool> vspdebug;
@@ -71,19 +37,34 @@ namespace or1kmvp {
         vcml::property<unsigned int> nrcpu;
 
         vcml::property<vcml::range> mem;
-        vcml::property<vcml::range> uart;
-        vcml::property<vcml::range> ompic;
+        vcml::property<vcml::range> uart0;
+        vcml::property<vcml::range> uart1;
         vcml::property<vcml::range> ethoc;
+        vcml::property<vcml::range> ompic;
 
         system(const sc_core::sc_module_name& name);
         virtual ~system();
 
-        void construct();
         void run();
-
-        void log_timing_stats() const;
+        void run_timed();
 
         virtual void end_of_elaboration() override;
+
+    private:
+        std::vector<openrisc*>   m_cpus;
+
+        vcml::generic::bus       m_bus;
+        vcml::generic::memory    m_mem;
+        vcml::generic::uart8250  m_uart0;
+        vcml::generic::uart8250  m_uart1;
+        vcml::opencores::ethoc   m_ethoc;
+        vcml::opencores::ompic   m_ompic;
+
+        sc_core::sc_signal<bool> m_irq_uart0;
+        sc_core::sc_signal<bool> m_irq_uart1;
+        sc_core::sc_signal<bool> m_irq_ethoc;
+
+        std::vector<sc_core::sc_signal<bool>*> m_irq_ompic;
     };
 
 }

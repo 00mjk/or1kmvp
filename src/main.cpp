@@ -24,17 +24,19 @@ void exit_usage() {
 #define PRINT(...) fprintf(stderr, ##__VA_ARGS__)
     PRINT("Usage: soc [optional arguments]\n");
     PRINT("  -d | --debug          Switch on debug logging\n");
-    PRINT("  -t | --trace          Switch on trace logging\n");
+    PRINT("  -t | --trace          Switch on trace and debug logging\n");
     PRINT("  -f | --file   <file>  Read config from <file>\n");
     PRINT("  -c | --config <x>=<y> Set property <x> to value <y>\n");
+    PRINT("  -y | --no-colors      Disable colored log output");
     PRINT("  -h | --help           Prints this message\n");
 #undef PRINT
     exit(EXIT_FAILURE);
 }
 
-extern "C" int sc_main(int argc, char** argv)  try {
+extern "C" int sc_main(int argc, char** argv) {
     vcml::report::report_segfaults();
     vcml::log_level log_level = vcml::LOG_INFO;
+    bool use_colors = true;
     std::string config;
 
     // parse command line
@@ -51,6 +53,9 @@ extern "C" int sc_main(int argc, char** argv)  try {
                 config = argv[i];
             else
                 exit_usage();
+        } else if ((strcmp(argv[i], "--no-colors") == 0) ||
+                   (strcmp(argv[i],          "-y") == 0)) {
+            use_colors = !use_colors;
         } else if ((strcmp(argv[i], "--help") == 0) ||
                    (strcmp(argv[i],     "-h") == 0)) {
             exit_usage();
@@ -59,7 +64,7 @@ extern "C" int sc_main(int argc, char** argv)  try {
 
     vcml::log_term logger;
     logger.set_level(vcml::LOG_ERROR, log_level);
-    logger.set_colors();
+    logger.set_colors(use_colors);
 
     vcml::property_provider_arg  provider_arg(argc, argv);
     vcml::property_provider_env  provider_env;
@@ -71,16 +76,16 @@ extern "C" int sc_main(int argc, char** argv)  try {
                                             sc_core::SC_DO_NOTHING);
 #endif
 
-    or1kmvp::system system("system");
-    system.construct();
-    system.run();
-    system.log_timing_stats();
-    return EXIT_SUCCESS;
+    try {
+        or1kmvp::system system("system");
+        system.run_timed();
+    } catch (vcml::report& r) {
+        vcml::logger::log(r);
+        return EXIT_FAILURE;
+    } catch (std::exception& e) {
+        vcml::log_error(e.what());
+        return EXIT_FAILURE;
+    }
 
-} catch (vcml::report& r) {
-    vcml::logger::log(r);
-    return EXIT_FAILURE;
-} catch (std::exception& e) {
-    vcml::log_error(e.what());
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }

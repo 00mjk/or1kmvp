@@ -49,22 +49,20 @@ namespace or1kmvp {
         double rt = get_run_time();
         vcml::u64 nc = get_num_cycles();
 
-        vcml::log_info("processor '%s'", name());
-        vcml::log_info("  clock speed  : %.1f MHz", clock / 1e6);
-        vcml::log_info("  sim speed    : %.1f MIPS", rt == 0.0 ? 0.0 :
-                       m_iss->get_num_instructions() / rt * 1e-6);
-        vcml::log_info("  instructions : %" PRId64,
-                       m_iss->get_num_instructions());
-        vcml::log_info("  cycles       : %" PRId64, nc);
-        vcml::log_info("  sleep-cycles : %" PRId64 " (%.1f%%)",
-                       m_iss->get_num_sleep_cycles(), nc == 0 ? 0.0 :
-                       m_iss->get_num_sleep_cycles() / (nc * 100.0));
-        vcml::log_info("  jit hit-rate : %.4f",
-                       m_iss->get_decode_cache_hit_rate());
-        vcml::log_info("  #lwa         : %" PRId64, m_iss->get_num_lwa());
-        vcml::log_info("  #swa         : %" PRId64, m_iss->get_num_swa());
-        vcml::log_info("  #swa failed  : %" PRId64,
-                       m_iss->get_num_swa_failed());
+        log_info("clock speed   %.1f MHz", clock / 1e6);
+        log_info("iss runtime   %.4f s", rt);
+        log_info("iss speed     %.1f MIPS", rt == 0.0 ? 0.0 :
+                 m_iss->get_num_instructions() / rt * 1e-6);
+        log_info("instructions  %" PRId64, m_iss->get_num_instructions());
+        log_info("cycles        %" PRId64, nc);
+        log_info("sleep-cycles  %" PRId64 " (%.1f%%)",
+                 m_iss->get_num_sleep_cycles(), nc == 0 ? 0.0 :
+                 m_iss->get_num_sleep_cycles() * 100.0 / nc);
+        log_info("jit hit-rate  %.4f",
+                 m_iss->get_decode_cache_hit_rate());
+        log_info("#lwa          %" PRId64, m_iss->get_num_lwa());
+        log_info("#swa          %" PRId64, m_iss->get_num_swa());
+        log_info("#swa failed   %" PRId64, m_iss->get_num_swa_failed());
 
         for (auto irq : IRQ) {
             vcml::irq_stats stats;
@@ -72,13 +70,13 @@ namespace or1kmvp {
                 continue;
 
             std::string s;
-            s += vcml::mkstr("  irq %d status :", stats.irq);
-            s += vcml::mkstr(" %d#", stats.irq_count);
+            s += vcml::mkstr("irq %d status", stats.irq);
+            s += vcml::mkstr("  %d#", stats.irq_count);
             s += vcml::mkstr(", avg %.1fus",
                     stats.irq_uptime.to_seconds() / stats.irq_count * 1e6);
             s += vcml::mkstr(", max %.1fus",
                     stats.irq_longest.to_seconds() * 1e6);
-            vcml::log_info(s.c_str());
+            log_info(s.c_str());
         }
     }
 
@@ -91,7 +89,8 @@ namespace or1kmvp {
         enable_insn_dmi("enable_insn_dmi", allow_dmi),
         enable_data_dmi("enable_data_dmi", allow_dmi),
         irq_ompic("irq_ompic", OR1KMVP_IRQ_OMPIC),
-        irq_uart("irq_uart", OR1KMVP_IRQ_UART),
+        irq_uart0("irq_uart0", OR1KMVP_IRQ_UART0),
+        irq_uart1("irq_uart1", OR1KMVP_IRQ_UART1),
         irq_ethoc("irq_ethoc", OR1KMVP_IRQ_ETHOC),
         insn_trace_file("insn_trace_file", ""),
         gdb_term("gdb_term", "or1kmvp-gdbterm") {
