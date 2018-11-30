@@ -15,13 +15,13 @@
  # limitations under the License.                                             #
  #                                                                            #
  ##############################################################################
- 
+
 find_path(OR1KISS_INCLUDE_DIRS NAMES or1kiss.h
           HINTS $ENV{OR1KISS_HOME}/include /opt/or1kiss/include)
-           
+
 find_library(OR1KISS_LIBRARIES NAMES or1kiss
              HINTS $ENV{OR1KISS_HOME}/lib /opt/or1kiss/lib)
-             
+
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OR1KISS DEFAULT_MSG
                                   OR1KISS_LIBRARIES
