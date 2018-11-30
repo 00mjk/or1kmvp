@@ -27,7 +27,7 @@ void exit_usage() {
     PRINT("  -t | --trace          Switch on trace and debug logging\n");
     PRINT("  -f | --file   <file>  Read config from <file>\n");
     PRINT("  -c | --config <x>=<y> Set property <x> to value <y>\n");
-    PRINT("  -y | --no-colors      Disable colored log output");
+    PRINT("  -y | --no-colors      Disable colored log output\n");
     PRINT("  -h | --help           Prints this message\n");
 #undef PRINT
     exit(EXIT_FAILURE);
