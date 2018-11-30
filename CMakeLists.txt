@@ -19,6 +19,8 @@
 project(or1kmvp)
 cmake_minimum_required(VERSION 3.5)
 
+option(STATIC "Build static simulator binary" OFF)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(LibElf REQUIRED)
 find_package(SystemC REQUIRED)
@@ -50,6 +52,10 @@ target_link_libraries(or1kmvp ${VCML_LIBRARIES})
 target_link_libraries(or1kmvp ${SYSTEMC_LIBRARIES})
 target_link_libraries(or1kmvp ${LIBELF_LIBRARIES})
 target_link_libraries(or1kmvp -pthread)
+
+if (STATIC)
+    target_link_libraries(or1kmvp -static)
+endif()
 
 install(TARGETS or1kmvp DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
