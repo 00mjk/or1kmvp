@@ -31,6 +31,8 @@ namespace or1kmvp {
         uart0("uart0", vcml::range(OR1KMVP_UART0_ADDR, OR1KMVP_UART0_END)),
         uart1("uart1", vcml::range(OR1KMVP_UART1_ADDR, OR1KMVP_UART1_END)),
         ethoc("ethoc", vcml::range(OR1KMVP_ETHOC_ADDR, OR1KMVP_ETHOC_END)),
+        ocfbc("ocfbc", vcml::range(OR1KMVP_OCFBC_ADDR, OR1KMVP_OCFBC_END)),
+        ockbd("ethoc", vcml::range(OR1KMVP_OCKBD_ADDR, OR1KMVP_OCKBD_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
         m_cpus(nrcpu),
         m_bus("bus"),
@@ -38,15 +40,21 @@ namespace or1kmvp {
         m_uart0("uart0"),
         m_uart1("uart1"),
         m_ethoc("ethoc"),
+        m_ocfbc("ocfbc"),
+        m_ockbd("ockbd"),
         m_ompic("ompic", nrcpu),
         m_irq_uart0("irq_uart0"),
         m_irq_uart1("irq_uart1"),
         m_irq_ethoc("irq_ethoc"),
+        m_irq_ocfbc("irq_ocfbc"),
+        m_irq_ockbd("irq_ockbd"),
         m_irq_ompic(nrcpu) {
 
         m_uart0.set_big_endian();
         m_uart1.set_big_endian();
         m_ethoc.set_big_endian();
+        m_ocfbc.set_big_endian();
+        m_ockbd.set_big_endian();
         m_ompic.set_big_endian();
 
         for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
@@ -66,21 +74,30 @@ namespace or1kmvp {
         m_bus.bind(m_ompic.IN, ompic);
         m_bus.bind(m_ethoc.IN, ethoc);
         m_bus.bind(m_ethoc.OUT);
+        m_bus.bind(m_ocfbc.IN, ocfbc);
+        m_bus.bind(m_ocfbc.OUT);
+        m_bus.bind(m_ockbd.IN, ockbd);
 
         // IRQ mapping
         m_uart0.IRQ.bind(m_irq_uart0);
         m_uart1.IRQ.bind(m_irq_uart1);
         m_ethoc.IRQ.bind(m_irq_ethoc);
+        m_ocfbc.IRQ.bind(m_irq_ocfbc);
+        m_ockbd.IRQ.bind(m_irq_ockbd);
 
         for (auto cpu : m_cpus) {
             unsigned int irq_uart0 = cpu->irq_uart0;
             unsigned int irq_uart1 = cpu->irq_uart1;
             unsigned int irq_ethoc = cpu->irq_ethoc;
+            unsigned int irq_ocfbc = cpu->irq_ocfbc;
+            unsigned int irq_ockbd = cpu->irq_ockbd;
             unsigned int irq_ompic = cpu->irq_ompic;
 
             cpu->IRQ[irq_uart0].bind(m_irq_uart0);
             cpu->IRQ[irq_uart1].bind(m_irq_uart1);
             cpu->IRQ[irq_ethoc].bind(m_irq_ethoc);
+            cpu->IRQ[irq_ocfbc].bind(m_irq_ocfbc);
+            cpu->IRQ[irq_ockbd].bind(m_irq_ockbd);
 
             vcml::u64 id = cpu->get_core_id();
             std::stringstream ss; ss << "irq_ompic_cpu" << id;

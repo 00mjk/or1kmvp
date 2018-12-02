@@ -92,6 +92,8 @@ namespace or1kmvp {
         irq_uart0("irq_uart0", OR1KMVP_IRQ_UART0),
         irq_uart1("irq_uart1", OR1KMVP_IRQ_UART1),
         irq_ethoc("irq_ethoc", OR1KMVP_IRQ_ETHOC),
+        irq_ocfbc("irq_ocfbc", OR1KMVP_IRQ_OCFBC),
+        irq_ockbd("irq_ockbd", OR1KMVP_IRQ_OCKBD),
         insn_trace_file("insn_trace_file", ""),
         gdb_term("gdb_term", "or1kmvp-gdbterm") {
         or1kiss::decode_cache_size sz;

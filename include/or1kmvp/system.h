@@ -40,6 +40,8 @@ namespace or1kmvp {
         vcml::property<vcml::range> uart0;
         vcml::property<vcml::range> uart1;
         vcml::property<vcml::range> ethoc;
+        vcml::property<vcml::range> ocfbc;
+        vcml::property<vcml::range> ockbd;
         vcml::property<vcml::range> ompic;
 
         system(const sc_core::sc_module_name& name);
@@ -58,11 +60,15 @@ namespace or1kmvp {
         vcml::generic::uart8250  m_uart0;
         vcml::generic::uart8250  m_uart1;
         vcml::opencores::ethoc   m_ethoc;
+        vcml::opencores::ocfbc   m_ocfbc;
+        vcml::opencores::ockbd   m_ockbd;
         vcml::opencores::ompic   m_ompic;
 
         sc_core::sc_signal<bool> m_irq_uart0;
         sc_core::sc_signal<bool> m_irq_uart1;
         sc_core::sc_signal<bool> m_irq_ethoc;
+        sc_core::sc_signal<bool> m_irq_ocfbc;
+        sc_core::sc_signal<bool> m_irq_ockbd;
 
         std::vector<sc_core::sc_signal<bool>*> m_irq_ompic;
     };
