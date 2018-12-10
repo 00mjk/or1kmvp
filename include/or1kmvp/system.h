@@ -39,6 +39,7 @@ namespace or1kmvp {
         vcml::property<vcml::range> mem;
         vcml::property<vcml::range> uart0;
         vcml::property<vcml::range> uart1;
+        vcml::property<vcml::range> rtc;
         vcml::property<vcml::range> ethoc;
         vcml::property<vcml::range> ocfbc;
         vcml::property<vcml::range> ockbd;
@@ -59,6 +60,7 @@ namespace or1kmvp {
         vcml::generic::memory    m_mem;
         vcml::generic::uart8250  m_uart0;
         vcml::generic::uart8250  m_uart1;
+        vcml::generic::rtc1742   m_rtc;
         vcml::opencores::ethoc   m_ethoc;
         vcml::opencores::ocfbc   m_ocfbc;
         vcml::opencores::ockbd   m_ockbd;

@@ -30,6 +30,7 @@ namespace or1kmvp {
         mem("mem", vcml::range(OR1KMVP_MEM_ADDR, OR1KMVP_MEM_END)),
         uart0("uart0", vcml::range(OR1KMVP_UART0_ADDR, OR1KMVP_UART0_END)),
         uart1("uart1", vcml::range(OR1KMVP_UART1_ADDR, OR1KMVP_UART1_END)),
+        rtc  ("rtc",   vcml::range(OR1KMVP_RTC_ADDR,   OR1KMVP_RTC_END)),
         ethoc("ethoc", vcml::range(OR1KMVP_ETHOC_ADDR, OR1KMVP_ETHOC_END)),
         ocfbc("ocfbc", vcml::range(OR1KMVP_OCFBC_ADDR, OR1KMVP_OCFBC_END)),
         ockbd("ethoc", vcml::range(OR1KMVP_OCKBD_ADDR, OR1KMVP_OCKBD_END)),
@@ -39,6 +40,7 @@ namespace or1kmvp {
         m_mem("mem", mem.get().length()),
         m_uart0("uart0"),
         m_uart1("uart1"),
+        m_rtc("rtc", vcml::generic::rtc1742::NVMEM_8K),
         m_ethoc("ethoc"),
         m_ocfbc("ocfbc"),
         m_ockbd("ockbd"),
@@ -52,6 +54,7 @@ namespace or1kmvp {
 
         m_uart0.set_big_endian();
         m_uart1.set_big_endian();
+        m_rtc.set_big_endian();
         m_ethoc.set_big_endian();
         m_ocfbc.set_big_endian();
         m_ockbd.set_big_endian();
@@ -71,6 +74,7 @@ namespace or1kmvp {
         m_bus.bind(m_mem.IN, mem);
         m_bus.bind(m_uart0.IN, uart0);
         m_bus.bind(m_uart1.IN, uart1);
+        m_bus.bind(m_rtc.IN, rtc);
         m_bus.bind(m_ompic.IN, ompic);
         m_bus.bind(m_ethoc.IN, ethoc);
         m_bus.bind(m_ethoc.OUT);
