@@ -30,6 +30,8 @@ namespace or1kmvp {
         or1kiss::or1k* m_iss;
 
         bool cmd_gdb(const std::vector<std::string>& args, std::ostream& os);
+        bool cmd_pic(const std::vector<std::string>& args, std::ostream& os);
+        bool cmd_spr(const std::vector<std::string>& args, std::ostream& os);
 
     public:
         vcml::property<bool> enable_decode_cache;
@@ -77,6 +79,13 @@ namespace or1kmvp {
 
         virtual bool gdb_insert_breakpoint(vcml::u64 addr) override;
         virtual bool gdb_remove_breakpoint(vcml::u64 addr) override;
+
+        virtual bool gdb_insert_watchpoint(const vcml::range& mem,
+                                           vcml::vcml_access acs) override;
+        virtual bool gdb_remove_watchpoint(const vcml::range& mem,
+                                           vcml::vcml_access acs) override;
+
+        virtual std::string gdb_handle_rcmd(const std::string& cmd) override;
     };
 
 }

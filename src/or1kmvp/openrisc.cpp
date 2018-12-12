@@ -45,6 +45,71 @@ namespace or1kmvp {
         return true;
     }
 
+    bool openrisc::cmd_pic(const std::vector<std::string>& args,
+                           std::ostream& os) {
+        or1kiss::u32 picsr = m_iss->get_spr(or1kiss::SPR_PICSR, true);
+        or1kiss::u32 picmr = m_iss->get_spr(or1kiss::SPR_PICMR, true);
+        os << basename() << " interrupt controller status" << std::endl
+           << "  PICSR: 0x" << std::hex << std::setw(8) << std::setfill('0')
+           << picsr << std::endl
+           << "  PICMR: 0x" << std::hex << std::setw(8) << std::setfill('0')
+           << picmr << std::endl
+           << std::endl;
+
+        os << "  Masked: ";
+        for (int i = 0; i < 32; i++) {
+            if ((picmr & (1 << i)) == 0)
+                os << std::dec << i << ", ";
+        }
+
+        if (picmr == 0)
+            os << "none";
+        os << std::endl;
+
+        os << "  Pending: ";
+        for (int i = 0; i < 32; i++) {
+            if (picsr & (1 << i))
+                os << std::dec << i << ", ";
+        }
+
+        if (picsr == 0)
+            os << "none";
+        // no newline needed
+
+        return true;
+    }
+
+    bool openrisc::cmd_spr(const std::vector<std::string>& args,
+                           std::ostream& os) {
+        unsigned int grpid = atoi(args[0].c_str());
+        if (grpid & ~0x1F) {
+            os << "invalid group id: " << grpid;
+            return false;
+        }
+
+        unsigned int regid = atoi(args[1].c_str());
+        if (regid & ~0x7FFF) {
+            os << "invalid group id: " << regid;
+            return false;
+        }
+
+        unsigned int sprid = (grpid & 0x1F) << 11 | (regid & 0x7FF);
+        if (args.size() > 2) {
+            or1kiss::u32 val = vcml::from_string<or1kiss::u32>(args[2]);
+            m_iss->set_spr(sprid, true);
+            os << "SPR[" << grpid << "," << regid << "] = SPR[" << sprid
+               << "] = 0x" << std::hex << std::setw(8) << std::setfill('0')
+               << val << " written";
+        } else {
+            or1kiss::u32 val = m_iss->get_spr(sprid, true);
+            os << "SPR[" << grpid << "," << regid << "] = SPR[" << sprid
+               << "] = 0x" << std::hex << std::setw(8) << std::setfill('0')
+               << val;
+        }
+
+        return true;
+    }
+
     void openrisc::log_timing_info() const {
         double rt = get_run_time();
         vcml::u64 nc = get_num_cycles();
@@ -111,6 +176,10 @@ namespace or1kmvp {
 
         register_command("gdb", 0, this, &openrisc::cmd_gdb,
                          "opens a new gdb debug session");
+        register_command("pic", 0, this, &openrisc::cmd_pic,
+                         "prints PIC status and pending interrupts");
+        register_command("spr", 2, this, &openrisc::cmd_spr,
+                         "reads or writes SPR <grpid> <regid> [value]");
     }
 
     openrisc::~openrisc() {
@@ -304,6 +373,22 @@ namespace or1kmvp {
 
         m_iss->remove_breakpoint((or1kiss::u32)addr);
         return true;
+    }
+
+    bool openrisc::gdb_insert_watchpoint(const vcml::range& mem,
+                                         vcml::vcml_access acs) {
+        return false;
+    }
+
+    bool openrisc::gdb_remove_watchpoint(const vcml::range& mem,
+                                         vcml::vcml_access acs) {
+        return false;
+    }
+
+    std::string openrisc::gdb_handle_rcmd(const std::string& cmd) {
+        std::stringstream ss;
+        ss << "command '" << cmd << "' not supported";
+        return ss.str();
     }
 
 }
