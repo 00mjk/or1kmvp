@@ -34,6 +34,7 @@ namespace or1kmvp {
         ethoc("ethoc", vcml::range(OR1KMVP_ETHOC_ADDR, OR1KMVP_ETHOC_END)),
         ocfbc("ocfbc", vcml::range(OR1KMVP_OCFBC_ADDR, OR1KMVP_OCFBC_END)),
         ockbd("ethoc", vcml::range(OR1KMVP_OCKBD_ADDR, OR1KMVP_OCKBD_END)),
+        ocspi("ocspi", vcml::range(OR1KMVP_OCSPI_ADDR, OR1KMVP_OCSPI_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
         m_cpus(nrcpu),
         m_bus("bus"),
@@ -44,12 +45,16 @@ namespace or1kmvp {
         m_ethoc("ethoc"),
         m_ocfbc("ocfbc"),
         m_ockbd("ockbd"),
+        m_ocspi("ocspi"),
         m_ompic("ompic", nrcpu),
+        m_spi2sd("spi2sd"),
+        m_sdcard("sdcard"),
         m_irq_uart0("irq_uart0"),
         m_irq_uart1("irq_uart1"),
         m_irq_ethoc("irq_ethoc"),
         m_irq_ocfbc("irq_ocfbc"),
         m_irq_ockbd("irq_ockbd"),
+        m_irq_ocspi("irq_ocspi"),
         m_irq_ompic(nrcpu) {
 
         m_uart0.set_big_endian();
@@ -58,6 +63,7 @@ namespace or1kmvp {
         m_ethoc.set_big_endian();
         m_ocfbc.set_big_endian();
         m_ockbd.set_big_endian();
+        m_ocspi.set_big_endian();
         m_ompic.set_big_endian();
 
         for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
@@ -81,6 +87,7 @@ namespace or1kmvp {
         m_bus.bind(m_ocfbc.IN, ocfbc);
         m_bus.bind(m_ocfbc.OUT);
         m_bus.bind(m_ockbd.IN, ockbd);
+        m_bus.bind(m_ocspi.IN, ocspi);
 
         // IRQ mapping
         m_uart0.IRQ.bind(m_irq_uart0);
@@ -88,6 +95,7 @@ namespace or1kmvp {
         m_ethoc.IRQ.bind(m_irq_ethoc);
         m_ocfbc.IRQ.bind(m_irq_ocfbc);
         m_ockbd.IRQ.bind(m_irq_ockbd);
+        m_ocspi.IRQ.bind(m_irq_ocspi);
 
         for (auto cpu : m_cpus) {
             unsigned int irq_uart0 = cpu->irq_uart0;
@@ -95,6 +103,7 @@ namespace or1kmvp {
             unsigned int irq_ethoc = cpu->irq_ethoc;
             unsigned int irq_ocfbc = cpu->irq_ocfbc;
             unsigned int irq_ockbd = cpu->irq_ockbd;
+            unsigned int irq_ocspi = cpu->irq_ocspi;
             unsigned int irq_ompic = cpu->irq_ompic;
 
             cpu->IRQ[irq_uart0].bind(m_irq_uart0);
@@ -102,6 +111,7 @@ namespace or1kmvp {
             cpu->IRQ[irq_ethoc].bind(m_irq_ethoc);
             cpu->IRQ[irq_ocfbc].bind(m_irq_ocfbc);
             cpu->IRQ[irq_ockbd].bind(m_irq_ockbd);
+            cpu->IRQ[irq_ocspi].bind(m_irq_ocspi);
 
             vcml::u64 id = cpu->get_core_id();
             std::stringstream ss; ss << "irq_ompic_cpu" << id;
@@ -109,6 +119,10 @@ namespace or1kmvp {
             cpu->IRQ[irq_ompic].bind(*m_irq_ompic[id]);
             m_ompic.IRQ[id].bind(*m_irq_ompic[id]);
         }
+
+        // SPI bus -> SD bus -> SD stub
+        m_ocspi.SPI_OUT.bind(m_spi2sd.SPI_IN);
+        m_spi2sd.SD_OUT.bind(m_sdcard.SD_IN);
     }
 
     system::~system() {

@@ -43,6 +43,7 @@ namespace or1kmvp {
         vcml::property<vcml::range> ethoc;
         vcml::property<vcml::range> ocfbc;
         vcml::property<vcml::range> ockbd;
+        vcml::property<vcml::range> ocspi;
         vcml::property<vcml::range> ompic;
 
         system(const sc_core::sc_module_name& name);
@@ -64,13 +65,18 @@ namespace or1kmvp {
         vcml::opencores::ethoc   m_ethoc;
         vcml::opencores::ocfbc   m_ocfbc;
         vcml::opencores::ockbd   m_ockbd;
+        vcml::opencores::ocspi   m_ocspi;
         vcml::opencores::ompic   m_ompic;
+
+        vcml::generic::spi2sd    m_spi2sd;
+        vcml::generic::sdcard    m_sdcard;
 
         sc_core::sc_signal<bool> m_irq_uart0;
         sc_core::sc_signal<bool> m_irq_uart1;
         sc_core::sc_signal<bool> m_irq_ethoc;
         sc_core::sc_signal<bool> m_irq_ocfbc;
         sc_core::sc_signal<bool> m_irq_ockbd;
+        sc_core::sc_signal<bool> m_irq_ocspi;
 
         std::vector<sc_core::sc_signal<bool>*> m_irq_ompic;
     };
