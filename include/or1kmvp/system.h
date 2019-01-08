@@ -40,6 +40,7 @@ namespace or1kmvp {
         vcml::property<vcml::range> uart0;
         vcml::property<vcml::range> uart1;
         vcml::property<vcml::range> rtc;
+        vcml::property<vcml::range> gpio;
         vcml::property<vcml::range> ethoc;
         vcml::property<vcml::range> ocfbc;
         vcml::property<vcml::range> ockbd;
@@ -62,14 +63,18 @@ namespace or1kmvp {
         vcml::generic::uart8250  m_uart0;
         vcml::generic::uart8250  m_uart1;
         vcml::generic::rtc1742   m_rtc;
+        vcml::generic::gpio      m_gpio;
         vcml::opencores::ethoc   m_ethoc;
         vcml::opencores::ocfbc   m_ocfbc;
         vcml::opencores::ockbd   m_ockbd;
         vcml::opencores::ocspi   m_ocspi;
         vcml::opencores::ompic   m_ompic;
 
+        vcml::generic::spibus    m_spibus;
         vcml::generic::spi2sd    m_spi2sd;
         vcml::generic::sdcard    m_sdcard;
+
+        sc_core::sc_signal<bool> m_gpio_spi0;
 
         sc_core::sc_signal<bool> m_irq_uart0;
         sc_core::sc_signal<bool> m_irq_uart1;
