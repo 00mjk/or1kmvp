@@ -193,6 +193,20 @@ config file or via the `-c` command line switch). If you change memory size,
 the default memory map will automatically adjust.
 
 ----
+## System Image
+The Linux system uses `dev/mmcblk0p1` as its root filesystem. You can either
+modify it directly from within the simulation (make sure `sw/sdcard0.img` is
+writable) or on your host PC. For the latter, do the following:
+```
+sudo losetup -f -P <install-dir>/sw/sdcard0.img # setup /dev/loopXX
+# figure out which loop device was used, it should have two partitions p1/p2
+sudo mount /dev/loopXXp1 /mnt
+# make your changes in /mnt
+sudo umount /mnt
+sudo losetup -D # detach loop device
+```
+
+----
 ## License
 
 This project is licensed under the Apache-2.0 license - see the
