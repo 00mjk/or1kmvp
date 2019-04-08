@@ -218,10 +218,11 @@ namespace or1kmvp {
 
         case or1kiss::STEP_BREAKPOINT:
             m_iss->remove_breakpoint(get_program_counter());
-            gdb_notify(vcml::debugging::GDBSIG_BREAKPOINT);
+            gdb_notify(vcml::debugging::GDBSIG_TRAP);
             break;
 
         case or1kiss::STEP_WATCHPOINT:
+            gdb_notify(vcml::debugging::GDBSIG_TRAP);
             break;
 
         case or1kiss::STEP_OK:
@@ -378,12 +379,34 @@ namespace or1kmvp {
 
     bool openrisc::gdb_insert_watchpoint(const vcml::range& mem,
                                          vcml::vcml_access acs) {
-        return false;
+        if (mem.end > std::numeric_limits<or1kiss::u32>::max())
+            return false;
+
+        or1kiss::u32 addr = (or1kiss::u32)mem.start;
+        or1kiss::u32 size = (or1kiss::u32)mem.length();
+
+        if (vcml::is_read_allowed(acs))
+            m_iss->insert_watchpoint_r(addr, size);
+        if (vcml::is_write_allowed(acs))
+            m_iss->insert_watchpoint_w(addr, size);
+
+        return true;
     }
 
     bool openrisc::gdb_remove_watchpoint(const vcml::range& mem,
                                          vcml::vcml_access acs) {
-        return false;
+        if (mem.end > std::numeric_limits<or1kiss::u32>::max())
+            return false;
+
+        or1kiss::u32 addr = (or1kiss::u32)mem.start;
+        or1kiss::u32 size = (or1kiss::u32)mem.length();
+
+        if (vcml::is_read_allowed(acs))
+            m_iss->remove_watchpoint_r(addr, size);
+        if (vcml::is_write_allowed(acs))
+            m_iss->remove_watchpoint_w(addr, size);
+
+        return true;
     }
 
     std::string openrisc::gdb_handle_rcmd(const std::string& cmd) {
