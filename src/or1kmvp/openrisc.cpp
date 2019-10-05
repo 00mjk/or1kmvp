@@ -232,11 +232,11 @@ namespace or1kmvp {
     }
 
     or1kiss::response openrisc::transact(const or1kiss::request& req) {
-        int flags = vcml::VCML_FLAG_NONE;
+        vcml::sideband info = vcml::SBI_NONE;
         if (req.is_debug())
-            flags |= vcml::VCML_FLAG_DEBUG;
+            info |= vcml::SBI_DEBUG;
         if (req.is_exclusive())
-            flags |= vcml::VCML_FLAG_EXCL;
+            info |= vcml::SBI_EXCL;
 
         tlm::tlm_response_status rs;
         vcml::master_socket& port = req.is_imem() ? INSN : DATA;
@@ -244,9 +244,9 @@ namespace or1kmvp {
 
         unsigned int nbytes = 0;
         if (req.is_write())
-            rs = port.write(req.addr, req.data, req.size, flags, &nbytes);
+            rs = port.write(req.addr, req.data, req.size, info, &nbytes);
         else
-            rs = port.read(req.addr, req.data, req.size, flags, &nbytes);
+            rs = port.read(req.addr, req.data, req.size, info, &nbytes);
 
         // Time-keeping
         if (!req.is_debug()) {
