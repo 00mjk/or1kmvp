@@ -112,9 +112,9 @@ namespace or1kmvp {
 
     void openrisc::log_timing_info() const {
         double rt = get_run_time();
-        vcml::u64 nc = get_num_cycles();
+        vcml::u64 nc = cycle_count();
 
-        log_info("clock speed   %.1f MHz", clock / 1e6);
+        log_info("clock speed   %.1f MHz", m_iss->get_clock() / 1e6);
         log_info("iss runtime   %.4f s", rt);
         log_info("iss speed     %.1f MIPS", rt == 0.0 ? 0.0 :
                  m_iss->get_num_instructions() / rt * 1e-6);
@@ -146,7 +146,7 @@ namespace or1kmvp {
     }
 
     openrisc::openrisc(const sc_core::sc_module_name& nm, unsigned int id):
-        vcml::processor(nm, OR1KMVP_CPU_DEFCLK),
+        vcml::processor(nm),
         or1kiss::env(or1kiss::ENDIAN_BIG),
         m_iss(NULL),
         enable_decode_cache("enable_decode_cache", true),
@@ -167,7 +167,6 @@ namespace or1kmvp {
                                  : or1kiss::DECODE_CACHE_OFF;
 
         m_iss = new or1kiss::or1k(this, sz);
-        m_iss->set_clock(clock);
         m_iss->set_core_id(id);
         m_iss->allow_sleep(enable_sleep_mode);
         m_iss->GPR[3] = OR1KMVP_DTB_ADDR;
@@ -185,6 +184,17 @@ namespace or1kmvp {
 
     openrisc::~openrisc() {
         if (m_iss) delete m_iss;
+    }
+
+    void openrisc::reset() {
+        m_iss->reset_cycles();
+        m_iss->reset_instructions();
+        m_iss->reset_compiles();
+        m_iss->reset_sleep_cycles();
+
+        memset(m_iss->GPR, 0, sizeof(m_iss->GPR));
+        m_iss->GPR[3] = OR1KMVP_DTB_ADDR;
+        m_iss->set_spr(or1kiss::SPR_NPC, 0x100, true);
     }
 
     std::string openrisc::disassemble(vcml::u64& addr, unsigned char* insn) {
@@ -205,15 +215,19 @@ namespace or1kmvp {
         return m_iss->get_core_id();
     }
 
+    vcml::u64 openrisc::cycle_count() const {
+        return m_iss->get_num_instructions() + m_iss->get_num_sleep_cycles();
+    }
+
     void openrisc::interrupt(unsigned int irq, bool set) {
         m_iss->interrupt(irq, set);
     }
 
-    void openrisc::simulate(unsigned int& n) {
-        m_iss->set_clock(clock);
+    void openrisc::simulate(unsigned int n) {
         switch (m_iss->step(n)) {
         case or1kiss::STEP_EXIT:
             sc_core::sc_stop();
+            wait();
             break;
 
         case or1kiss::STEP_BREAKPOINT:
@@ -231,6 +245,11 @@ namespace or1kmvp {
         }
     }
 
+    void openrisc::handle_clock_update(clock_t oldclk, clock_t newclk) {
+        processor::handle_clock_update(oldclk, newclk);
+        m_iss->set_clock(newclk);
+    }
+
     or1kiss::response openrisc::transact(const or1kiss::request& req) {
         vcml::sideband info = vcml::SBI_NONE;
         if (req.is_debug())
@@ -240,7 +259,8 @@ namespace or1kmvp {
 
         tlm::tlm_response_status rs;
         vcml::master_socket& port = req.is_imem() ? INSN : DATA;
-        sc_core::sc_time now = sc_core::sc_time_stamp();
+
+        sc_core::sc_time now = local_time_stamp();
 
         unsigned int nbytes = 0;
         if (req.is_write())
@@ -249,10 +269,8 @@ namespace or1kmvp {
             rs = port.read(req.addr, req.data, req.size, info, &nbytes);
 
         // Time-keeping
-        if (!req.is_debug()) {
-            sc_core::sc_time delta = sc_core::sc_time_stamp() - now;
-            req.cycles = delta.to_seconds() * this->clock + 0.5; // round up
-        }
+        if (!req.is_debug())
+            req.cycles = (local_time_stamp() - now) / clock_cycle();
 
         // Check bus error
         if (rs != tlm::TLM_OK_RESPONSE) {
@@ -407,12 +425,6 @@ namespace or1kmvp {
             m_iss->remove_watchpoint_w(addr, size);
 
         return true;
-    }
-
-    std::string openrisc::gdb_handle_rcmd(const std::string& cmd) {
-        std::stringstream ss;
-        ss << "command '" << cmd << "' not supported";
-        return ss.str();
     }
 
 }

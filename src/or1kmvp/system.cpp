@@ -21,7 +21,7 @@
 namespace or1kmvp {
 
     system::system(const sc_core::sc_module_name& nm):
-        vcml::component(nm),
+        vcml::module(nm),
         session("session", 0),
         vspdebug("vspdebug", false),
         quantum("quantum", sc_core::sc_time(1, sc_core::SC_US)),
@@ -38,6 +38,8 @@ namespace or1kmvp {
         ocspi("ocspi", vcml::range(OR1KMVP_OCSPI_ADDR, OR1KMVP_OCSPI_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
         m_cpus(nrcpu),
+        m_clock("clock", OR1KMVP_CPU_DEFCLK),
+        m_reset("reset"),
         m_bus("bus"),
         m_mem("mem", mem.get().length()),
         m_uart0("uart0"),
@@ -52,6 +54,8 @@ namespace or1kmvp {
         m_spibus("spibus"),
         m_spi2sd("spi2sd"),
         m_sdcard("sdcard"),
+        m_sig_clock("sig_clock"),
+        m_sig_reset("sig_reset"),
         m_gpio_spi0("gpio_spi0"),
         m_irq_uart0("irq_uart0"),
         m_irq_uart1("irq_uart1"),
@@ -94,6 +98,46 @@ namespace or1kmvp {
         m_bus.bind(m_ocfbc.OUT);
         m_bus.bind(m_ockbd.IN, ockbd);
         m_bus.bind(m_ocspi.IN, ocspi);
+
+        // Clock
+        m_clock.CLOCK.bind(m_sig_clock);
+        m_bus.CLOCK.bind(m_sig_clock);
+        m_mem.CLOCK.bind(m_sig_clock);
+        m_uart0.CLOCK.bind(m_sig_clock);
+        m_uart1.CLOCK.bind(m_sig_clock);
+        m_rtc.CLOCK.bind(m_sig_clock);
+        m_gpio.CLOCK.bind(m_sig_clock);
+        m_ethoc.CLOCK.bind(m_sig_clock);
+        m_ocfbc.CLOCK.bind(m_sig_clock);
+        m_ockbd.CLOCK.bind(m_sig_clock);
+        m_ocspi.CLOCK.bind(m_sig_clock);
+        m_ompic.CLOCK.bind(m_sig_clock);
+        m_spibus.CLOCK.bind(m_sig_clock);
+        m_spi2sd.CLOCK.bind(m_sig_clock);
+        m_sdcard.CLOCK.bind(m_sig_clock);
+
+        for (auto cpu : m_cpus)
+            cpu->CLOCK.bind(m_sig_clock);
+
+        // Reset
+        m_reset.RESET.bind(m_sig_reset);
+        m_bus.RESET.bind(m_sig_reset);
+        m_mem.RESET.bind(m_sig_reset);
+        m_uart0.RESET.bind(m_sig_reset);
+        m_uart1.RESET.bind(m_sig_reset);
+        m_rtc.RESET.bind(m_sig_reset);
+        m_gpio.RESET.bind(m_sig_reset);
+        m_ethoc.RESET.bind(m_sig_reset);
+        m_ocfbc.RESET.bind(m_sig_reset);
+        m_ockbd.RESET.bind(m_sig_reset);
+        m_ocspi.RESET.bind(m_sig_reset);
+        m_ompic.RESET.bind(m_sig_reset);
+        m_spibus.RESET.bind(m_sig_reset);
+        m_spi2sd.RESET.bind(m_sig_reset);
+        m_sdcard.RESET.bind(m_sig_reset);
+
+        for (auto cpu : m_cpus)
+            cpu->RESET.bind(m_sig_reset);
 
         // GPIOs
         m_gpio.GPIO[0].bind(m_gpio_spi0);

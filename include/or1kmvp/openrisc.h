@@ -25,7 +25,7 @@
 namespace or1kmvp {
 
     class openrisc: public vcml::processor,
-                    public or1kiss::env {
+                    private or1kiss::env {
     private:
         or1kiss::or1k* m_iss;
 
@@ -56,14 +56,20 @@ namespace or1kmvp {
         openrisc(const sc_core::sc_module_name& nm, unsigned int coreid);
         virtual ~openrisc();
 
+        virtual void reset() override;
+
         virtual std::string disassemble(vcml::u64&, unsigned char*) override;
 
         virtual vcml::u64 get_program_counter() override;
         virtual vcml::u64 get_stack_pointer()   override;
         virtual vcml::u64 get_core_id()         override;
 
+        vcml::u64 cycle_count() const override;
+
+    protected:
         virtual void interrupt(unsigned int irq, bool set) override;
-        virtual void simulate(unsigned int&) override;
+        virtual void simulate(unsigned int) override;
+        virtual void handle_clock_update(clock_t prev, clock_t curr) override;
 
         virtual or1kiss::response transact(const or1kiss::request& r) override;
 
@@ -85,8 +91,6 @@ namespace or1kmvp {
                                            vcml::vcml_access acs) override;
         virtual bool gdb_remove_watchpoint(const vcml::range& mem,
                                            vcml::vcml_access acs) override;
-
-        virtual std::string gdb_handle_rcmd(const std::string& cmd) override;
     };
 
 }
