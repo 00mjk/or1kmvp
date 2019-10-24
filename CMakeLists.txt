@@ -21,7 +21,7 @@ cmake_minimum_required(VERSION 3.5)
 
 option(STATIC "Build static simulator binary" OFF)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(LibELF REQUIRED)
 find_package(SystemC REQUIRED)
 find_package(VCML REQUIRED)
