@@ -74,8 +74,4 @@
 #define OR1KMVP_IRQ_OCKBD       (6)
 #define OR1KMVP_IRQ_OCSPI       (7)
 
-/* Important memory locations */
-#define OR1KMVP_KERNEL_ADDR     (0x00000000)
-#define OR1KMVP_DTB_ADDR        (0x04000000)
-
 #endif

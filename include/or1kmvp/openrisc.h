@@ -60,6 +60,9 @@ namespace or1kmvp {
 
         virtual std::string disassemble(vcml::u64&, unsigned char*) override;
 
+        virtual vcml::u64 get_cpureg(int regno) override;
+        virtual void      set_cpureg(int regno, vcml::u64 val) override;
+
         virtual vcml::u64 get_program_counter() override;
         virtual vcml::u64 get_stack_pointer()   override;
         virtual vcml::u64 get_core_id()         override;
@@ -72,14 +75,6 @@ namespace or1kmvp {
         virtual void handle_clock_update(clock_t prev, clock_t curr) override;
 
         virtual or1kiss::response transact(const or1kiss::request& r) override;
-
-        virtual vcml::u64 gdb_num_registers() override;
-        virtual vcml::u64 gdb_register_width(vcml::u64 reg) override;
-
-        virtual bool gdb_read_reg  (vcml::u64 reg, void* buffer,
-                                    vcml::u64 size) override;
-        virtual bool gdb_write_reg (vcml::u64 reg, const void* buffer,
-                                    vcml::u64 size) override;
 
         virtual bool gdb_page_size(vcml::u64& size) override;
         virtual bool gdb_virt_to_phys(vcml::u64 va, vcml::u64& pa) override;

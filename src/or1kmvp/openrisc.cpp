@@ -145,6 +145,98 @@ namespace or1kmvp {
         }
     }
 
+    using vcml::VCML_ACCESS_READ;
+    using vcml::VCML_ACCESS_WRITE;
+    using vcml::VCML_ACCESS_READ_WRITE;
+
+#define SPR(x) (32 + or1kiss::SPR_##x)
+
+    static const std::vector<vcml::cpureg> openrisc_cpuregs = {
+        {  0,  0, "gpr/0",  4, VCML_ACCESS_READ_WRITE },
+        {  1,  1, "gpr/1",  4, VCML_ACCESS_READ_WRITE },
+        {  2,  2, "gpr/2",  4, VCML_ACCESS_READ_WRITE },
+        {  3,  3, "gpr/3",  4, VCML_ACCESS_READ_WRITE },
+        {  4,  4, "gpr/4",  4, VCML_ACCESS_READ_WRITE },
+        {  5,  5, "gpr/5",  4, VCML_ACCESS_READ_WRITE },
+        {  6,  6, "gpr/6",  4, VCML_ACCESS_READ_WRITE },
+        {  7,  7, "gpr/7",  4, VCML_ACCESS_READ_WRITE },
+        {  8,  8, "gpr/8",  4, VCML_ACCESS_READ_WRITE },
+        {  9,  9, "gpr/9",  4, VCML_ACCESS_READ_WRITE },
+        { 10, 10, "gpr/10", 4, VCML_ACCESS_READ_WRITE },
+        { 11, 11, "gpr/11", 4, VCML_ACCESS_READ_WRITE },
+        { 12, 12, "gpr/12", 4, VCML_ACCESS_READ_WRITE },
+        { 13, 13, "gpr/13", 4, VCML_ACCESS_READ_WRITE },
+        { 14, 14, "gpr/14", 4, VCML_ACCESS_READ_WRITE },
+        { 15, 15, "gpr/15", 4, VCML_ACCESS_READ_WRITE },
+        { 16, 16, "gpr/16", 4, VCML_ACCESS_READ_WRITE },
+        { 17, 17, "gpr/17", 4, VCML_ACCESS_READ_WRITE },
+        { 18, 18, "gpr/18", 4, VCML_ACCESS_READ_WRITE },
+        { 19, 19, "gpr/19", 4, VCML_ACCESS_READ_WRITE },
+        { 20, 20, "gpr/20", 4, VCML_ACCESS_READ_WRITE },
+        { 21, 21, "gpr/21", 4, VCML_ACCESS_READ_WRITE },
+        { 22, 22, "gpr/22", 4, VCML_ACCESS_READ_WRITE },
+        { 23, 23, "gpr/23", 4, VCML_ACCESS_READ_WRITE },
+        { 24, 24, "gpr/24", 4, VCML_ACCESS_READ_WRITE },
+        { 25, 25, "gpr/25", 4, VCML_ACCESS_READ_WRITE },
+        { 26, 26, "gpr/26", 4, VCML_ACCESS_READ_WRITE },
+        { 27, 27, "gpr/27", 4, VCML_ACCESS_READ_WRITE },
+        { 28, 28, "gpr/28", 4, VCML_ACCESS_READ_WRITE },
+        { 29, 29, "gpr/29", 4, VCML_ACCESS_READ_WRITE },
+        { 30, 30, "gpr/30", 4, VCML_ACCESS_READ_WRITE },
+        { 31, 31, "gpr/31", 4, VCML_ACCESS_READ_WRITE },
+
+        { SPR(VR),       -1, "spr/sys/vr",       4, VCML_ACCESS_READ  },
+        { SPR(UPR),      -1, "spr/sys/upr",      4, VCML_ACCESS_READ  },
+        { SPR(CPUCFGR),  -1, "spr/sys/cpucfgr",  4, VCML_ACCESS_READ  },
+        { SPR(DMMUCFGR), -1, "spr/sys/dmmucfgr", 4, VCML_ACCESS_READ  },
+        { SPR(IMMUCFGR), -1, "spr/sys/immucfgr", 4, VCML_ACCESS_READ  },
+        { SPR(DCCFGR),   -1, "spr/sys/dccfgr",   4, VCML_ACCESS_READ  },
+        { SPR(ICCFGR),   -1, "spr/sys/iccfgr",   4, VCML_ACCESS_READ  },
+        { SPR(VR2),      -1, "spr/sys/vr2",      4, VCML_ACCESS_READ  },
+        { SPR(AVR),      -1, "spr/sys/avr",      4, VCML_ACCESS_READ  },
+        { SPR(EVBAR),    -1, "spr/sys/evbar",    4, VCML_ACCESS_READ_WRITE },
+        { SPR(AECR),     -1, "spr/sys/aecr",     4, VCML_ACCESS_READ_WRITE },
+        { SPR(AESR),     -1, "spr/sys/aesr",     4, VCML_ACCESS_READ_WRITE },
+        { SPR(NPC),      33, "spr/sys/npc",      4, VCML_ACCESS_READ_WRITE },
+        { SPR(SR),       34, "spr/sys/sr",       4, VCML_ACCESS_READ_WRITE },
+        { SPR(PPC),      32, "spr/sys/ppc",      4, VCML_ACCESS_READ_WRITE },
+        { SPR(FPCSR),    -1, "spr/sys/fpcsr",    4, VCML_ACCESS_READ_WRITE },
+        { SPR(EPCR),     -1, "spr/sys/epcr",     4, VCML_ACCESS_READ_WRITE },
+        { SPR(EEAR),     -1, "spr/sys/eear",     4, VCML_ACCESS_READ_WRITE },
+        { SPR(ESR),      -1, "spr/sys/esr",      4, VCML_ACCESS_READ_WRITE },
+        { SPR(COREID),   -1, "spr/sys/coreid",   4, VCML_ACCESS_READ  },
+        { SPR(NUMCORES), -1, "spr/sys/numcores", 4, VCML_ACCESS_READ  },
+
+        { SPR(DMMUCR),   -1, "spr/dmmu/cr",      4, VCML_ACCESS_READ_WRITE },
+        { SPR(DTLBEIR),  -1, "spr/dmmu/tlbeir",  4, VCML_ACCESS_WRITE },
+
+        { SPR(IMMUCR),   -1, "spr/immu/cr",      4, VCML_ACCESS_READ_WRITE },
+        { SPR(ITLBEIR),  -1, "spr/immu/tlbeir",  4, VCML_ACCESS_WRITE },
+
+        { SPR(DCBPR),    -1, "spr/dc/bpr",       4, VCML_ACCESS_READ_WRITE },
+        { SPR(DCBFR),    -1, "spr/dc/bfr",       4, VCML_ACCESS_READ_WRITE },
+        { SPR(DCBIR),    -1, "spr/dc/bir",       4, VCML_ACCESS_WRITE },
+        { SPR(DCBWR),    -1, "spr/dc/bwr",       4, VCML_ACCESS_WRITE },
+        { SPR(DCBLR),    -1, "spr/dc/blr",       4, VCML_ACCESS_WRITE },
+
+        { SPR(ICBPR),    -1, "spr/ic/bpr",       4, VCML_ACCESS_WRITE },
+        { SPR(ICBIR),    -1, "spr/ic/bir",       4, VCML_ACCESS_WRITE },
+        { SPR(ICBLR),    -1, "spr/ic/blr",       4, VCML_ACCESS_WRITE },
+
+        { SPR(MACLO),    -1, "spr/mac/lo",       4, VCML_ACCESS_READ_WRITE },
+        { SPR(MACHI),    -1, "spr/mac/hi",       4, VCML_ACCESS_READ_WRITE },
+
+        { SPR(PMR),      -1, "spr/pmr/pm",       4, VCML_ACCESS_READ_WRITE },
+
+        { SPR(PICMR),    -1, "spr/pic/mr",       4, VCML_ACCESS_READ_WRITE },
+        { SPR(PICSR),    -1, "spr/pic/sr",       4, VCML_ACCESS_READ_WRITE },
+
+        { SPR(TTMR),     -1, "spr/tt/mr",        4, VCML_ACCESS_READ_WRITE },
+        { SPR(TTCR),     -1, "spr/tt/cr",        4, VCML_ACCESS_READ_WRITE },
+    };
+
+#undef SPR
+
     openrisc::openrisc(const sc_core::sc_module_name& nm, unsigned int id):
         vcml::processor(nm),
         or1kiss::env(or1kiss::ENDIAN_BIG),
@@ -169,7 +261,6 @@ namespace or1kmvp {
         m_iss = new or1kiss::or1k(this, sz);
         m_iss->set_core_id(id);
         m_iss->allow_sleep(enable_sleep_mode);
-        m_iss->GPR[3] = OR1KMVP_DTB_ADDR;
 
         if (!insn_trace_file.get().empty())
             m_iss->trace(insn_trace_file);
@@ -180,6 +271,9 @@ namespace or1kmvp {
                          "prints PIC status and pending interrupts");
         register_command("spr", 2, this, &openrisc::cmd_spr,
                          "reads or writes SPR <grpid> <regid> [value]");
+
+        set_big_endian();
+        define_cpuregs(openrisc_cpuregs);
     }
 
     openrisc::~openrisc() {
@@ -187,13 +281,14 @@ namespace or1kmvp {
     }
 
     void openrisc::reset() {
+        processor::reset();
+
         m_iss->reset_cycles();
         m_iss->reset_instructions();
         m_iss->reset_compiles();
         m_iss->reset_sleep_cycles();
 
         memset(m_iss->GPR, 0, sizeof(m_iss->GPR));
-        m_iss->GPR[3] = OR1KMVP_DTB_ADDR;
         m_iss->set_spr(or1kiss::SPR_NPC, 0x100, true);
     }
 
@@ -201,6 +296,26 @@ namespace or1kmvp {
         or1kiss::u32* pinsn = (or1kiss::u32*)insn;
         addr += 4;
         return or1kiss::disassemble(or1kiss::byte_swap(*pinsn));
+    }
+
+    vcml::u64 openrisc::get_cpureg(int regno) {
+        if (regno < 0)
+            return 0;
+
+        if (regno < 32)
+            return m_iss->GPR[regno];
+
+        return m_iss->get_spr(regno - 32, true);
+    }
+
+    void openrisc::set_cpureg(int regno, vcml::u64 val) {
+        if (regno < 0)
+            return;
+
+        if (regno < 32)
+            m_iss->GPR[regno] = val;
+        else
+            m_iss->set_spr(regno - 32, val, true);
     }
 
     vcml::u64 openrisc::get_program_counter() {
@@ -302,51 +417,6 @@ namespace or1kmvp {
         if (req.is_exclusive() && (nbytes != req.size))
             return or1kiss::RESP_FAILED;
         return or1kiss::RESP_SUCCESS;
-    }
-
-    vcml::u64 openrisc::gdb_num_registers() {
-        return 35; // 32 GPR + PPC + NPC + SR
-    }
-
-    vcml::u64 openrisc::gdb_register_width(vcml::u64 idx) {
-        return sizeof(m_iss->GPR[0]);
-    }
-
-    bool openrisc::gdb_read_reg(vcml::u64 idx, void* buffer, vcml::u64 size) {
-        if (idx >= gdb_num_registers())
-            return false;
-        if (size != gdb_register_width(idx))
-            return false;
-
-        or1kiss::u32 val = 0;
-        switch (idx) {
-        case 32: val = m_iss->get_spr(or1kiss::SPR_PPC, true); break;
-        case 33: val = m_iss->get_spr(or1kiss::SPR_NPC, true); break;
-        case 34: val = m_iss->get_spr(or1kiss::SPR_SR,  true); break;
-        default: val = m_iss->GPR[idx]; break;
-        }
-
-        or1kiss::memcpyswp(buffer, &val, size);
-        return true;
-    }
-
-    bool openrisc::gdb_write_reg(vcml::u64 i, const void* buf, vcml::u64 sz) {
-        if (i >= gdb_num_registers())
-            return false;
-        if (sz != gdb_register_width(i))
-            return false;
-
-        or1kiss::u32 val = 0;
-        or1kiss::memcpyswp(&val, buf, sz);
-
-        switch (i) {
-        case 32: m_iss->set_spr(or1kiss::SPR_PPC, val, true); break;
-        case 33: m_iss->set_spr(or1kiss::SPR_NPC, val, true); break;
-        case 34: m_iss->set_spr(or1kiss::SPR_SR,  val, true); break;
-        default: m_iss->GPR[i] = val; break;
-        }
-
-        return true;
     }
 
     bool openrisc::gdb_page_size(vcml::u64& size) {
