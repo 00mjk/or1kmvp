@@ -21,11 +21,7 @@
 namespace or1kmvp {
 
     system::system(const sc_core::sc_module_name& nm):
-        vcml::module(nm),
-        session("session", 0),
-        vspdebug("vspdebug", false),
-        quantum("quantum", sc_core::sc_time(1, sc_core::SC_US)),
-        duration("duration", sc_core::SC_ZERO_TIME),
+        vcml::system(nm),
         nrcpu("nrcpu", 1),
         mem("mem", vcml::range(OR1KMVP_MEM_ADDR, OR1KMVP_MEM_END)),
         uart0("uart0", vcml::range(OR1KMVP_UART0_ADDR, OR1KMVP_UART0_END)),
@@ -186,29 +182,9 @@ namespace or1kmvp {
             SAFE_DELETE(cpu);
     }
 
-    void system::run() {
-        tlm::tlm_global_quantum::instance().set(quantum);
-        if (session > 0) {
-            vcml::debugging::vspserver vspsession(session);
-            vspsession.echo(vspdebug);
-            vspsession.start();
-        } else if (duration != sc_core::SC_ZERO_TIME) {
-            log_info("starting simulation until %s using %s quantum",
-                           duration.get().to_string().c_str(),
-                           quantum.get().to_string().c_str());
-            sc_core::sc_start(duration);
-            log_info("simulation stopped");
-        } else {
-            log_info("starting infinite simulation using %s quantum",
-                           quantum.get().to_string().c_str());
-            sc_core::sc_start();
-            log_info("simulation stopped");
-        }
-    }
-
-    void system::run_timed() {
+    int system::run() {
         double simstart = vcml::realtime();
-        run();
+        int result = vcml::system::run();
         double realtime = vcml::realtime() - simstart;
         double duration = sc_core::sc_time_stamp().to_seconds();
 
@@ -225,6 +201,8 @@ namespace or1kmvp {
 
         for (auto cpu : m_cpus)
             cpu->log_timing_info();
+
+        return result;
     }
 
     void system::end_of_elaboration() {

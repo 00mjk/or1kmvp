@@ -20,72 +20,7 @@
 #include "or1kmvp/config.h"
 #include "or1kmvp/system.h"
 
-void exit_usage() {
-#define PRINT(...) fprintf(stderr, ##__VA_ARGS__)
-    PRINT("Usage: soc [optional arguments]\n");
-    PRINT("  -d | --debug          Switch on debug logging\n");
-    PRINT("  -t | --trace          Switch on trace and debug logging\n");
-    PRINT("  -f | --file   <file>  Read config from <file>\n");
-    PRINT("  -c | --config <x>=<y> Set property <x> to value <y>\n");
-    PRINT("  -y | --no-colors      Disable colored log output\n");
-    PRINT("  -h | --help           Prints this message\n");
-#undef PRINT
-    exit(EXIT_FAILURE);
-}
-
 extern "C" int sc_main(int argc, char** argv) {
-    vcml::report::report_segfaults();
-    vcml::log_level log_level = vcml::LOG_INFO;
-    bool use_colors = true;
-    std::string config;
-
-    // parse command line
-    for (int i = 1; i < argc; i++) {
-        if ((strcmp(argv[i], "--debug") == 0) ||
-            (strcmp(argv[i],      "-d") == 0)) {
-            log_level = vcml::LOG_DEBUG;
-        } else if ((strcmp(argv[i], "--trace") == 0) ||
-                   (strcmp(argv[i],      "-t") == 0)) {
-            log_level = vcml::LOG_TRACE;
-        } else if ((strcmp(argv[i], "--file") == 0) ||
-                   (strcmp(argv[i],     "-f") == 0)) {
-            if (++i < argc)
-                config = argv[i];
-            else
-                exit_usage();
-        } else if ((strcmp(argv[i], "--no-colors") == 0) ||
-                   (strcmp(argv[i],          "-y") == 0)) {
-            use_colors = !use_colors;
-        } else if ((strcmp(argv[i], "--help") == 0) ||
-                   (strcmp(argv[i],     "-h") == 0)) {
-            exit_usage();
-        }
-    }
-
-    vcml::log_term logger;
-    logger.set_level(vcml::LOG_ERROR, log_level);
-    logger.set_colors(use_colors);
-
-    vcml::property_provider_arg  provider_arg(argc, argv);
-    vcml::property_provider_env  provider_env;
-    vcml::property_provider_file provider_file(config);
-
-#ifdef NDEBUG
-    // disable deprecated warning for release builds
-    sc_core::sc_report_handler::set_actions("/IEEE_Std_1666/deprecated",
-                                            sc_core::SC_DO_NOTHING);
-#endif
-
-    try {
-        or1kmvp::system system("system");
-        system.run_timed();
-    } catch (vcml::report& r) {
-        vcml::logger::log(r);
-        return EXIT_FAILURE;
-    } catch (std::exception& e) {
-        vcml::log_error(e.what());
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+    or1kmvp::system system("system");
+    return system.run();
 }
