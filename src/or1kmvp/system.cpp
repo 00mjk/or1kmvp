@@ -33,6 +33,7 @@ namespace or1kmvp {
         ockbd("ethoc", vcml::range(OR1KMVP_OCKBD_ADDR, OR1KMVP_OCKBD_END)),
         ocspi("ocspi", vcml::range(OR1KMVP_OCSPI_ADDR, OR1KMVP_OCSPI_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
+        hwrng("hwrng", vcml::range(OR1KMVP_HWRNG_ADDR, OR1KMVP_HWRNG_END)),
         m_cpus(nrcpu),
         m_clock("clock", OR1KMVP_CPU_DEFCLK),
         m_reset("reset"),
@@ -42,6 +43,7 @@ namespace or1kmvp {
         m_uart1("uart1"),
         m_rtc("rtc", vcml::generic::rtc1742::NVMEM_8K),
         m_gpio("gpio"),
+        m_hwrng("hwrng"),
         m_ethoc("ethoc"),
         m_ocfbc("ocfbc"),
         m_ockbd("ockbd"),
@@ -70,6 +72,7 @@ namespace or1kmvp {
         m_ockbd.set_big_endian();
         m_ocspi.set_big_endian();
         m_ompic.set_big_endian();
+        m_hwrng.set_big_endian();
 
         for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
             std::stringstream ss; ss << "cpu" << cpu;
@@ -87,6 +90,7 @@ namespace or1kmvp {
         m_bus.bind(m_uart1.IN, uart1);
         m_bus.bind(m_rtc.IN, rtc);
         m_bus.bind(m_gpio.IN, gpio);
+        m_bus.bind(m_hwrng.IN, hwrng);
         m_bus.bind(m_ompic.IN, ompic);
         m_bus.bind(m_ethoc.IN, ethoc);
         m_bus.bind(m_ethoc.OUT);
@@ -103,6 +107,7 @@ namespace or1kmvp {
         m_uart1.CLOCK.bind(m_sig_clock);
         m_rtc.CLOCK.bind(m_sig_clock);
         m_gpio.CLOCK.bind(m_sig_clock);
+        m_hwrng.CLOCK.bind(m_sig_clock);
         m_ethoc.CLOCK.bind(m_sig_clock);
         m_ocfbc.CLOCK.bind(m_sig_clock);
         m_ockbd.CLOCK.bind(m_sig_clock);
@@ -123,6 +128,7 @@ namespace or1kmvp {
         m_uart1.RESET.bind(m_sig_reset);
         m_rtc.RESET.bind(m_sig_reset);
         m_gpio.RESET.bind(m_sig_reset);
+        m_hwrng.RESET.bind(m_sig_reset);
         m_ethoc.RESET.bind(m_sig_reset);
         m_ocfbc.RESET.bind(m_sig_reset);
         m_ockbd.RESET.bind(m_sig_reset);

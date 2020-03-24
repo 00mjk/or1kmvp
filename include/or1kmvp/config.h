@@ -22,7 +22,7 @@
 #include "or1kmvp/common.h"
 
 /* Default cpu clock */
-#define OR1KMVP_CPU_DEFCLK      (100000000)  // 100MHz
+#define OR1KMVP_CPU_DEFCLK      (100 * vcml::MHz)
 
 /* Memory map */
 #define OR1KMVP_MEM_ADDR        (0x00000000)
@@ -64,6 +64,10 @@
 #define OR1KMVP_OMPIC_ADDR      (0x98000000)
 #define OR1KMVP_OMPIC_SIZE      (OR1KISS_PAGE_SIZE)
 #define OR1KMVP_OMPIC_END       (OR1KMVP_OMPIC_ADDR + OR1KMVP_OMPIC_SIZE - 1)
+
+#define OR1KMVP_HWRNG_ADDR      (0x99000000)
+#define OR1KMVP_HWRNG_SIZE      (OR1KISS_PAGE_SIZE)
+#define OR1KMVP_HWRNG_END       (OR1KMVP_HWRNG_ADDR + OR1KMVP_HWRNG_SIZE - 1)
 
 /* Interrupt map */
 #define OR1KMVP_IRQ_OMPIC       (1)

@@ -39,6 +39,7 @@ namespace or1kmvp {
         vcml::property<vcml::range>  ockbd;
         vcml::property<vcml::range>  ocspi;
         vcml::property<vcml::range>  ompic;
+        vcml::property<vcml::range>  hwrng;
 
         system() = delete;
         system(const sc_core::sc_module_name& name);
@@ -59,6 +60,7 @@ namespace or1kmvp {
         vcml::generic::uart8250      m_uart1;
         vcml::generic::rtc1742       m_rtc;
         vcml::generic::gpio          m_gpio;
+        vcml::generic::hwrng         m_hwrng;
         vcml::opencores::ethoc       m_ethoc;
         vcml::opencores::ocfbc       m_ocfbc;
         vcml::opencores::ockbd       m_ockbd;
