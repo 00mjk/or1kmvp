@@ -34,6 +34,7 @@ namespace or1kmvp {
         ocspi("ocspi", vcml::range(OR1KMVP_OCSPI_ADDR, OR1KMVP_OCSPI_END)),
         ompic("ompic", vcml::range(OR1KMVP_OMPIC_ADDR, OR1KMVP_OMPIC_END)),
         hwrng("hwrng", vcml::range(OR1KMVP_HWRNG_ADDR, OR1KMVP_HWRNG_END)),
+        sdhci("sdhci", vcml::range(OR1KMVP_SDHCI_ADDR, OR1KMVP_SDHCI_END)),
         m_cpus(nrcpu),
         m_clock("clock", OR1KMVP_CPU_DEFCLK),
         m_reset("reset"),
@@ -44,6 +45,7 @@ namespace or1kmvp {
         m_rtc("rtc", vcml::generic::rtc1742::NVMEM_8K),
         m_gpio("gpio"),
         m_hwrng("hwrng"),
+        m_sdhci("sdhci"),
         m_ethoc("ethoc"),
         m_ocfbc("ocfbc"),
         m_ockbd("ockbd"),
@@ -51,7 +53,8 @@ namespace or1kmvp {
         m_ompic("ompic", nrcpu),
         m_spibus("spibus"),
         m_spi2sd("spi2sd"),
-        m_sdcard("sdcard"),
+        m_sdcard0("sdcard0"),
+        m_sdcard1("sdcard1"),
         m_sig_clock("sig_clock"),
         m_sig_reset("sig_reset"),
         m_gpio_spi0("gpio_spi0"),
@@ -61,6 +64,7 @@ namespace or1kmvp {
         m_irq_ocfbc("irq_ocfbc"),
         m_irq_ockbd("irq_ockbd"),
         m_irq_ocspi("irq_ocspi"),
+        m_irq_sdhci("irq_sdhci"),
         m_irq_ompic(nrcpu) {
 
         m_uart0.set_big_endian();
@@ -73,6 +77,7 @@ namespace or1kmvp {
         m_ocspi.set_big_endian();
         m_ompic.set_big_endian();
         m_hwrng.set_big_endian();
+        m_sdhci.set_little_endian();
 
         for (unsigned int cpu = 0; cpu < nrcpu; cpu++) {
             std::stringstream ss; ss << "cpu" << cpu;
@@ -91,6 +96,8 @@ namespace or1kmvp {
         m_bus.bind(m_rtc.IN, rtc);
         m_bus.bind(m_gpio.IN, gpio);
         m_bus.bind(m_hwrng.IN, hwrng);
+        m_bus.bind(m_sdhci.IN, sdhci);
+        m_bus.bind(m_sdhci.OUT);
         m_bus.bind(m_ompic.IN, ompic);
         m_bus.bind(m_ethoc.IN, ethoc);
         m_bus.bind(m_ethoc.OUT);
@@ -108,6 +115,7 @@ namespace or1kmvp {
         m_rtc.CLOCK.bind(m_sig_clock);
         m_gpio.CLOCK.bind(m_sig_clock);
         m_hwrng.CLOCK.bind(m_sig_clock);
+        m_sdhci.CLOCK.bind(m_sig_clock);
         m_ethoc.CLOCK.bind(m_sig_clock);
         m_ocfbc.CLOCK.bind(m_sig_clock);
         m_ockbd.CLOCK.bind(m_sig_clock);
@@ -115,7 +123,8 @@ namespace or1kmvp {
         m_ompic.CLOCK.bind(m_sig_clock);
         m_spibus.CLOCK.bind(m_sig_clock);
         m_spi2sd.CLOCK.bind(m_sig_clock);
-        m_sdcard.CLOCK.bind(m_sig_clock);
+        m_sdcard0.CLOCK.bind(m_sig_clock);
+        m_sdcard1.CLOCK.bind(m_sig_clock);
 
         for (auto cpu : m_cpus)
             cpu->CLOCK.bind(m_sig_clock);
@@ -129,6 +138,7 @@ namespace or1kmvp {
         m_rtc.RESET.bind(m_sig_reset);
         m_gpio.RESET.bind(m_sig_reset);
         m_hwrng.RESET.bind(m_sig_reset);
+        m_sdhci.RESET.bind(m_sig_reset);
         m_ethoc.RESET.bind(m_sig_reset);
         m_ocfbc.RESET.bind(m_sig_reset);
         m_ockbd.RESET.bind(m_sig_reset);
@@ -136,7 +146,8 @@ namespace or1kmvp {
         m_ompic.RESET.bind(m_sig_reset);
         m_spibus.RESET.bind(m_sig_reset);
         m_spi2sd.RESET.bind(m_sig_reset);
-        m_sdcard.RESET.bind(m_sig_reset);
+        m_sdcard0.RESET.bind(m_sig_reset);
+        m_sdcard1.RESET.bind(m_sig_reset);
 
         for (auto cpu : m_cpus)
             cpu->RESET.bind(m_sig_reset);
@@ -151,6 +162,7 @@ namespace or1kmvp {
         m_ocfbc.IRQ.bind(m_irq_ocfbc);
         m_ockbd.IRQ.bind(m_irq_ockbd);
         m_ocspi.IRQ.bind(m_irq_ocspi);
+        m_sdhci.IRQ.bind(m_irq_sdhci);
 
         for (auto cpu : m_cpus) {
             unsigned int irq_uart0 = cpu->irq_uart0;
@@ -160,6 +172,7 @@ namespace or1kmvp {
             unsigned int irq_ockbd = cpu->irq_ockbd;
             unsigned int irq_ocspi = cpu->irq_ocspi;
             unsigned int irq_ompic = cpu->irq_ompic;
+            unsigned int irq_sdhci = cpu->irq_sdhci;
 
             cpu->IRQ[irq_uart0].bind(m_irq_uart0);
             cpu->IRQ[irq_uart1].bind(m_irq_uart1);
@@ -167,6 +180,7 @@ namespace or1kmvp {
             cpu->IRQ[irq_ocfbc].bind(m_irq_ocfbc);
             cpu->IRQ[irq_ockbd].bind(m_irq_ockbd);
             cpu->IRQ[irq_ocspi].bind(m_irq_ocspi);
+            cpu->IRQ[irq_sdhci].bind(m_irq_sdhci);
 
             vcml::u64 id = cpu->get_core_id();
             std::stringstream ss; ss << "irq_ompic_cpu" << id;
@@ -178,7 +192,10 @@ namespace or1kmvp {
         // SPI controller -> SPI bus -> SD bus -> SD card
         m_ocspi.SPI_OUT.bind(m_spibus.SPI_IN);
         m_spibus.bind(m_spi2sd.SPI_IN, m_gpio_spi0, false); // CS_ACTIVE_LOW
-        m_spi2sd.SD_OUT.bind(m_sdcard.SD_IN);
+
+        // sdcard0 -> SDHCI, sdcard1 -> SPI
+        m_sdhci.SD_OUT.bind(m_sdcard0.SD_IN);
+        m_spi2sd.SD_OUT.bind(m_sdcard1.SD_IN);
     }
 
     system::~system() {

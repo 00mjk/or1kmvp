@@ -46,6 +46,7 @@ namespace or1kmvp {
         vcml::property<unsigned int> irq_ocfbc;
         vcml::property<unsigned int> irq_ockbd;
         vcml::property<unsigned int> irq_ocspi;
+        vcml::property<unsigned int> irq_sdhci;
 
         vcml::property<std::string> insn_trace_file;
         vcml::property<std::string> gdb_term;

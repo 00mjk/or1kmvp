@@ -69,6 +69,10 @@
 #define OR1KMVP_HWRNG_SIZE      (OR1KISS_PAGE_SIZE)
 #define OR1KMVP_HWRNG_END       (OR1KMVP_HWRNG_ADDR + OR1KMVP_HWRNG_SIZE - 1)
 
+#define OR1KMVP_SDHCI_ADDR      (0x9a000000)
+#define OR1KMVP_SDHCI_SIZE      (OR1KISS_PAGE_SIZE)
+#define OR1KMVP_SDHCI_END       (OR1KMVP_SDHCI_ADDR + OR1KMVP_SDHCI_SIZE - 1)
+
 /* Interrupt map */
 #define OR1KMVP_IRQ_OMPIC       (1)
 #define OR1KMVP_IRQ_UART0       (2)
@@ -77,5 +81,6 @@
 #define OR1KMVP_IRQ_OCFBC       (5)
 #define OR1KMVP_IRQ_OCKBD       (6)
 #define OR1KMVP_IRQ_OCSPI       (7)
+#define OR1KMVP_IRQ_SDHCI       (8)
 
 #endif

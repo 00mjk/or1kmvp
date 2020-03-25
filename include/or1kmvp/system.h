@@ -40,6 +40,7 @@ namespace or1kmvp {
         vcml::property<vcml::range>  ocspi;
         vcml::property<vcml::range>  ompic;
         vcml::property<vcml::range>  hwrng;
+        vcml::property<vcml::range>  sdhci;
 
         system() = delete;
         system(const sc_core::sc_module_name& name);
@@ -61,15 +62,17 @@ namespace or1kmvp {
         vcml::generic::rtc1742       m_rtc;
         vcml::generic::gpio          m_gpio;
         vcml::generic::hwrng         m_hwrng;
+        vcml::generic::sdhci         m_sdhci;
         vcml::opencores::ethoc       m_ethoc;
         vcml::opencores::ocfbc       m_ocfbc;
         vcml::opencores::ockbd       m_ockbd;
         vcml::opencores::ocspi       m_ocspi;
         vcml::opencores::ompic       m_ompic;
-
         vcml::generic::spibus        m_spibus;
         vcml::generic::spi2sd        m_spi2sd;
-        vcml::generic::sdcard        m_sdcard;
+
+        vcml::generic::sdcard        m_sdcard0;
+        vcml::generic::sdcard        m_sdcard1;
 
         sc_core::sc_signal<clock_t>  m_sig_clock;
         sc_core::sc_signal<bool>     m_sig_reset;
@@ -82,6 +85,7 @@ namespace or1kmvp {
         sc_core::sc_signal<bool>     m_irq_ocfbc;
         sc_core::sc_signal<bool>     m_irq_ockbd;
         sc_core::sc_signal<bool>     m_irq_ocspi;
+        sc_core::sc_signal<bool>     m_irq_sdhci;
 
         std::vector<sc_core::sc_signal<bool>*> m_irq_ompic;
     };
