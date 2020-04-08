@@ -332,7 +332,7 @@ namespace or1kmvp {
     }
 
     vcml::u64 openrisc::cycle_count() const {
-        return m_iss->get_num_instructions() + m_iss->get_num_sleep_cycles();
+        return m_iss->get_num_cycles();
     }
 
     void openrisc::interrupt(unsigned int irq, bool set) {
