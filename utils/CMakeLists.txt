@@ -17,3 +17,12 @@
  ##############################################################################
 
 install(PROGRAMS gdbterm.sh DESTINATION bin RENAME or1kmvp-gdbterm)
+
+set(VCML_UTILS ${VCML_HOME}/utils)
+if(NOT EXISTS ${VCML_UTILS})
+    message(FATAL_ERROR "Could not find vcml-utils")
+endif()
+
+install(PROGRAMS ${VCML_UTILS}/tapnet.sh DESTINATION bin RENAME or1kmvp-tapnet)
+add_executable(or1kmvp-tapctl ${VCML_UTILS}/tapctl.c)
+install(TARGETS or1kmvp-tapctl DESTINATION bin)

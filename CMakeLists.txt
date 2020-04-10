@@ -16,24 +16,38 @@
  #                                                                            #
  ##############################################################################
 
-project(or1kmvp)
 cmake_minimum_required(VERSION 3.5)
+project(or1kmvp LANGUAGES C CXX)
 
-option(STATIC "Build static simulator binary" OFF)
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-find_package(LibELF REQUIRED)
-find_package(SystemC REQUIRED)
-find_package(VCML REQUIRED)
-find_package(or1kiss REQUIRED)
-find_package(LibVNC)
+option(OR1KMVP_BUILD_STATIC "Build static simulator binary" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 set(CMAKE_EXE_LINKER_FLAGS -rdynamic)
 
-set(src "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set(inc "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(VCML_HOME $ENV{VCML_HOME})
+set(OR1KISS_HOME $ENV{OR1KISS_HOME})
+
+if (NOT EXISTS ${VCML_HOME})
+    message(FATAL_ERROR "Could not find vcml")
+endif()
+
+if (NOT EXISTS ${OR1KISS_HOME})
+    message(FATAL_ERROR "Could not find or1kiss")
+endif()
+
+message(STATUS "Found vcml at " ${VCML_HOME})
+message(STATUS "Found or1kiss at " ${OR1KISS_HOME})
+
+set(VCML_BUILD_TESTS OFF CACHE BOOL "Disable vcml unit tests" FORCE)
+set(VCML_BUILD_UTILS OFF CACHE BOOL "Disable vcml utility programs" FORCE)
+add_subdirectory(${VCML_HOME} vcml EXCLUDE_FROM_ALL)
+
+set(OR1KISS_BUILD_SIM OFF CACHE BOOL "Disable standalone simulator" FORCE)
+set(OR1KISS_BUILD_SW  OFF CACHE BOOL "Disable building sample software" FORCE)
+add_subdirectory(${OR1KISS_HOME} or1kiss EXCLUDE_FROM_ALL)
+
+set(src ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(inc ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(sources
     ${src}/or1kmvp/openrisc.cpp
@@ -41,44 +55,17 @@ set(sources
     ${src}/main.cpp)
 
 add_executable(or1kmvp ${sources})
-
 target_include_directories(or1kmvp PRIVATE ${inc})
-target_include_directories(or1kmvp PRIVATE ${LIBELF_INCLUDE_DIRS})
-target_include_directories(or1kmvp PRIVATE ${OR1KISS_INCLUDE_DIRS})
-target_include_directories(or1kmvp PRIVATE ${VCML_INCLUDE_DIRS})
-target_include_directories(or1kmvp SYSTEM PRIVATE ${SYSTEMC_INCLUDE_DIRS})
 
-target_link_libraries(or1kmvp ${OR1KISS_LIBRARIES})
-target_link_libraries(or1kmvp ${VCML_LIBRARIES})
-target_link_libraries(or1kmvp ${SYSTEMC_LIBRARIES})
-target_link_libraries(or1kmvp ${LIBELF_LIBRARIES})
-target_link_libraries(or1kmvp -pthread)
+target_link_libraries(or1kmvp vcml)
+target_link_libraries(or1kmvp or1kiss)
 
-if (STATIC)
+if (OR1KMVP_BUILD_STATIC)
     target_link_libraries(or1kmvp -static)
-endif()
-
-if(LIBVNC_FOUND)
-    message(STATUS "Building with VNC support")
-    target_compile_definitions(or1kmvp PUBLIC HAVE_LIBVNC)
-    target_include_directories(or1kmvp SYSTEM PUBLIC ${LIBVNC_INCLUDE_DIRS})
-    target_link_libraries(or1kmvp ${LIBVNC_LIBRARIES})
-else()
-    message(STATUS "Building without VNC support")
 endif()
 
 install(TARGETS or1kmvp DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
-
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sw/)
-    install(DIRECTORY sw/ DESTINATION sw)
-endif()
+install(DIRECTORY sw/ DESTINATION sw)
 
 add_subdirectory(utils)
-
-foreach(util tapctl tapnet)
-    set(usrc $ENV{VCML_HOME}/bin/vcml-${util})
-    if (EXISTS ${usrc})
-        install(PROGRAMS ${usrc} DESTINATION bin RENAME or1kmvp-${util})
-    endif()
-endforeach()

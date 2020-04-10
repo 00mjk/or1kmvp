@@ -1,24 +1,32 @@
-dist: trusty
+dist: bionic
 sudo: false
 
 language: c++
-
-compiler:
-  - gcc
+compiler: gcc
 
 addons:
   apt:
     packages:
     - libelf-dev
+    - expect
 
 cache:
   directories:
     - DEPENDS
 
-env:
-  - BUILD=RELEASE TARGET_ARCH=linux64 SYSTEMC=systemc-2.3.0a
-  - BUILD=RELEASE TARGET_ARCH=linux64 SYSTEMC=systemc-2.3.1a
-  - BUILD=RELEASE TARGET_ARCH=linux64 SYSTEMC=systemc-2.3.2
+jobs:
+  include:
+    - name: "SystemC 2.3.0a"
+      env:  BUILD=RELEASE SYSTEMC=systemc-2.3.0a
+
+    - name: "SystemC 2.3.1a"
+      env:  BUILD=RELEASE SYSTEMC=systemc-2.3.1a
+
+    - name: "SystemC 2.3.2"
+      env:  BUILD=RELEASE SYSTEMC=systemc-2.3.2
+
+    - name: "SystemC 2.3.3"
+      env:  BUILD=RELEASE SYSTEMC=systemc-2.3.3
 
 install:
   - mkdir -p DEPENDS && cd DEPENDS
@@ -34,28 +42,18 @@ install:
           cd ../..
           rm -rf $SYSTEMC.tar.gz $SYSTEMC/BUILD
       fi
-  - export VCML_HOME=`pwd`/vcml/$BUILD
+  - export VCML_HOME=`pwd`/vcml
   - | # Build vcml
       if [ ! -d vcml ]; then
           git clone https://github.com/janweinstock/vcml.git
       fi
-      cd vcml && git pull origin master
-      mkdir -p $BUILD/BUILD && cd $BUILD/BUILD
-      cmake ../.. -DCMAKE_INSTALL_PREFIX=$VCML_HOME -DCMAKE_BUILD_TYPE=$BUILD
-      make -j 4 && make install
-      cd ../../..
-      rm -rf vcml/$BUILD/BUILD
-  - export OR1KISS_HOME=`pwd`/or1kiss/$BUILD
+      cd vcml && git pull origin master && cd ..
+  - export OR1KISS_HOME=`pwd`/or1kiss
   - | # Build or1kiss
       if [ ! -d or1kiss ]; then
           git clone https://github.com/janweinstock/or1kiss.git
       fi
-      cd or1kiss && git pull origin master
-      mkdir -p $BUILD/BUILD && cd $BUILD/BUILD
-      cmake ../.. -DCMAKE_INSTALL_PREFIX=$OR1KISS_HOME -DCMAKE_BUILD_TYPE=$BUILD -DBUILD_SW=OFF
-      make -j 4 && make install
-      cd ../../..
-      rm -rf or1kiss/$BUILD/BUILD
+      cd or1kiss && git pull origin master && cd ..
   - cd ..
 
 before_script:
