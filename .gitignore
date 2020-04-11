@@ -1,9 +1,6 @@
 # Ignore build directories
 BUILD*
 
-# Ignore linux image files
-sw
-
 # Ignore build files
 *.o
 *.a
