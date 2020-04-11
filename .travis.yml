@@ -61,4 +61,4 @@ before_script:
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD
 
 script:
-  - make
+  - make -j 4 && ctest --output-on-failure
