@@ -146,7 +146,7 @@ processor is doing. The debug context is bare-metal, meaning you will need
 a bare-metal debugger, i.e., `or1k-elf-gdb`. To connect to a VP running Linux,
 you can try the following (use port `55100 + coreid` when running SMP):
 ```
-or1k-gdb-elf <install-dir>/sw/vmlinux-4.3.0.elf
+or1k-gdb-elf <install-dir>/sw/vmlinux-4.20.0.elf
 (gdb) target remote :55100
 (gdb) ... do stuff on core 0...
 (gdb) detach # disconnect
@@ -195,11 +195,11 @@ the default memory map will automatically adjust.
 ----
 ## System Image
 The Linux system uses `dev/mmcblk0p1` as its root filesystem. You can either
-modify it directly from within the simulation (make sure `sw/sdcard0.mbr` is
+modify it directly from within the simulation (make sure `sw/sdcard0.gpt` is
 writable) or on your host PC. For the latter, do the following:
 ```
 sudo losetup -f -P <install-dir>/sw/sdcard0.img # setup /dev/loopXX
-losetup -a | grep sdcard0.mbr # figure out which loop device was used
+losetup -a | grep sdcard0.gpt # figure out which loop device was used
 # figure out which loop device was used, it should have two partitions p1/p2
 sudo mount /dev/loopXXp1 /mnt
 # make your changes in /mnt
