@@ -282,14 +282,13 @@ namespace or1kmvp {
     }
 
     void openrisc::reset() {
+        memset(m_iss->GPR, 0, sizeof(m_iss->GPR));
         processor::reset();
 
         m_iss->reset_cycles();
         m_iss->reset_instructions();
         m_iss->reset_compiles();
         m_iss->reset_sleep_cycles();
-
-        memset(m_iss->GPR, 0, sizeof(m_iss->GPR));
         m_iss->set_spr(or1kiss::SPR_NPC, 0x100, true);
     }
 
