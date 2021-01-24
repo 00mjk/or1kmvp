@@ -141,7 +141,7 @@ namespace or1kmvp {
                     stats.irq_uptime.to_seconds() / stats.irq_count * 1e6);
             s += vcml::mkstr(", max %.1fus",
                     stats.irq_longest.to_seconds() * 1e6);
-            log_info(s.c_str());
+            log_info("%s", s.c_str());
         }
     }
 

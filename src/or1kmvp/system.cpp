@@ -231,7 +231,7 @@ namespace or1kmvp {
     void system::end_of_elaboration() {
         std::stringstream ss;
         m_bus.execute("show", VCML_NO_ARGS, ss);
-        vcml::log_debug(ss.str().c_str());
+        vcml::log_debug("%s", ss.str().c_str());
     }
 
 }
