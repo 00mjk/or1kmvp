@@ -7,8 +7,10 @@ compiler: gcc
 addons:
   apt:
     packages:
-    - libelf-dev
     - expect
+    - libelf-dev
+    - libsdl2-dev
+    - libvncserver-dev
 
 cache:
   directories:
