@@ -36,6 +36,9 @@ macro(linux_boot nrcpu dmi timeout)
 
     set(argv ${argv} -c system.sdcard0.readonly=true)
     set(argv ${argv} -c system.sdcard1.readonly=true)
+    
+    set(argv ${argv} -c system.ocfbc.display=)
+    set(argv ${argv} -c system.ockbd.display=)
 
     math(EXPR limit "${nrcpu} - 1")
     foreach(cpu RANGE ${limit}) # cmake for loop is [0, limit]
