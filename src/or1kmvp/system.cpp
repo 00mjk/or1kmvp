@@ -182,7 +182,7 @@ namespace or1kmvp {
             cpu->IRQ[irq_ocspi].bind(m_irq_ocspi);
             cpu->IRQ[irq_sdhci].bind(m_irq_sdhci);
 
-            vcml::u64 id = cpu->get_core_id();
+            vcml::u64 id = cpu->core_id();
             std::stringstream ss; ss << "irq_ompic_cpu" << id;
             m_irq_ompic[id] = new sc_core::sc_signal<bool>(ss.str().c_str());
             cpu->IRQ[irq_ompic].bind(*m_irq_ompic[id]);

@@ -59,14 +59,14 @@ namespace or1kmvp {
 
         virtual void reset() override;
 
-        virtual std::string disassemble(vcml::u64&, unsigned char*) override;
+        virtual bool disassemble(void*, vcml::u64&, std::string&) override;
 
-        virtual vcml::u64 get_cpureg(int regno) override;
-        virtual void      set_cpureg(int regno, vcml::u64 val) override;
+        virtual vcml::u64 program_counter() override;
+        virtual vcml::u64 link_register() override;
+        virtual vcml::u64 stack_pointer() override;
 
-        virtual vcml::u64 get_program_counter() override;
-        virtual vcml::u64 get_stack_pointer()   override;
-        virtual vcml::u64 get_core_id()         override;
+        virtual vcml::u64 core_id() override;
+        virtual void set_core_id(vcml::u64 id);
 
         vcml::u64 cycle_count() const override;
 
@@ -77,16 +77,21 @@ namespace or1kmvp {
 
         virtual or1kiss::response transact(const or1kiss::request& r) override;
 
-        virtual bool gdb_page_size(vcml::u64& size) override;
-        virtual bool gdb_virt_to_phys(vcml::u64 va, vcml::u64& pa) override;
+        virtual bool read_reg_dbg(vcml::u64 idx, vcml::u64& val) override;
+        virtual bool write_reg_dbg(vcml::u64 idx, vcml::u64 val) override;
 
-        virtual bool gdb_insert_breakpoint(vcml::u64 addr) override;
-        virtual bool gdb_remove_breakpoint(vcml::u64 addr) override;
+        virtual bool page_size(vcml::u64& size) override;
+        virtual bool virt_to_phys(vcml::u64 va, vcml::u64& pa) override;
 
-        virtual bool gdb_insert_watchpoint(const vcml::range& mem,
-                                           vcml::vcml_access acs) override;
-        virtual bool gdb_remove_watchpoint(const vcml::range& mem,
-                                           vcml::vcml_access acs) override;
+        virtual bool insert_breakpoint(vcml::u64 addr) override;
+        virtual bool remove_breakpoint(vcml::u64 addr) override;
+
+        virtual bool insert_watchpoint(const vcml::range& mem,
+                                       vcml::vcml_access acs) override;
+        virtual bool remove_watchpoint(const vcml::range& mem,
+                                       vcml::vcml_access acs) override;
+
+        virtual void gdb_collect_regs(std::vector<std::string>&) override;
     };
 
 }
