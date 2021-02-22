@@ -349,13 +349,20 @@ namespace or1kmvp {
             break;
 
         case or1kiss::STEP_BREAKPOINT:
-            m_iss->remove_breakpoint(program_counter());
-            gdb_notify(vcml::debugging::GDBSIG_TRAP);
+            notify_breakpoint_hit(program_counter());
             break;
 
-        case or1kiss::STEP_WATCHPOINT:
-            gdb_notify(vcml::debugging::GDBSIG_TRAP);
+        case or1kiss::STEP_WATCHPOINT: {
+            or1kiss::watchpoint_event event;
+            if (m_iss->get_watchpoint_event(event)) {
+                vcml::range addr(event.addr, event.addr + event.size - 1);
+                if (event.iswr)
+                    notify_watchpoint_write(addr, event.wval);
+                else
+                    notify_watchpoint_read(addr);
+            }
             break;
+        }
 
         case or1kiss::STEP_OK:
         default:
@@ -485,32 +492,32 @@ namespace or1kmvp {
     }
 
     bool openrisc::insert_watchpoint(const vcml::range& mem,
-                                         vcml::vcml_access acs) {
+                                     vcml::vcml_access prot) {
         if (mem.end > std::numeric_limits<or1kiss::u32>::max())
             return false;
 
         or1kiss::u32 addr = (or1kiss::u32)mem.start;
         or1kiss::u32 size = (or1kiss::u32)mem.length();
 
-        if (vcml::is_read_allowed(acs))
+        if (vcml::is_read_allowed(prot))
             m_iss->insert_watchpoint_r(addr, size);
-        if (vcml::is_write_allowed(acs))
+        if (vcml::is_write_allowed(prot))
             m_iss->insert_watchpoint_w(addr, size);
 
         return true;
     }
 
     bool openrisc::remove_watchpoint(const vcml::range& mem,
-                                         vcml::vcml_access acs) {
+                                     vcml::vcml_access prot) {
         if (mem.end > std::numeric_limits<or1kiss::u32>::max())
             return false;
 
         or1kiss::u32 addr = (or1kiss::u32)mem.start;
         or1kiss::u32 size = (or1kiss::u32)mem.length();
 
-        if (vcml::is_read_allowed(acs))
+        if (vcml::is_read_allowed(prot))
             m_iss->remove_watchpoint_r(addr, size);
-        if (vcml::is_write_allowed(acs))
+        if (vcml::is_write_allowed(prot))
             m_iss->remove_watchpoint_w(addr, size);
 
         return true;
