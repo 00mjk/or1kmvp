@@ -59,7 +59,7 @@ namespace or1kmvp {
 
         virtual void reset() override;
 
-        virtual bool disassemble(void*, vcml::u64&, std::string&) override;
+        virtual bool disassemble(vcml::u8*, vcml::u64&, std::string&) override;
 
         virtual vcml::u64 program_counter() override;
         virtual vcml::u64 link_register() override;

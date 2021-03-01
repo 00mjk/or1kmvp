@@ -302,11 +302,13 @@ namespace or1kmvp {
         m_iss->set_spr(or1kiss::SPR_NPC, 0x100, true);
     }
 
-    bool openrisc::disassemble(void* buf, vcml::u64& addr, std::string& code) {
+    bool openrisc::disassemble(vcml::u8* ibuf, vcml::u64& addr,
+                               std::string& code) {
         if (addr & 3) // check alignment
             return false;
 
-        or1kiss::u32 insn = or1kiss::byte_swap(*(or1kiss::u32*)buf);
+        or1kiss::u32 insn = 0;
+        or1kiss::memcpyswp(&insn, ibuf, sizeof(insn));
         code = or1kiss::disassemble(insn);
         addr += 4;
 
